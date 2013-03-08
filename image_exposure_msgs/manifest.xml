@@ -1,0 +1,14 @@
+<package>
+  <description brief="image_exposure_msgs">
+
+     image_exposure_msgs
+
+  </description>
+  <author>Chad Rockey</author>
+  <license>Government Purpose Rights</license>
+  <review status="unreviewed" notes=""/>
+  <url></url>
+  <depend package="statistics_msgs" />
+</package>
+
+

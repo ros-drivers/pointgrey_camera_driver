@@ -1,0 +1,17 @@
+<launch>
+
+  <!-- This will take care of lauching a pointgrey camera with an associated stereo image_proc node. -->
+  <!-- This example is intended for simple testing. -->
+  
+	<group ns="camera">
+  		<node pkg="nodelet" type="nodelet" name="pg_nodelet" output="screen" args="standalone pointgrey_camera_driver/PointGreyStereoCameraNodelet" >
+    			<param name="first_namespace" value="left" />
+			<!--param name="serial" value="10151688" /-->
+    			<!--param name="camera_info_url" value="file:///home/chadrockey/.ros/camera_info/10151688.yaml" /-->
+			<param name="frame_id" value="/bumblebee" />
+    			<param name="second_namespace" value="right" />
+    			<!--param name="second_info_url" value="file:///home/chadrockey/.ros/camera_info/10151688_right.yaml" /-->
+  		</node>
+	</group>
+
+</launch>

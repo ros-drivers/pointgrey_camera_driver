@@ -1,0 +1,18 @@
+<launch>
+
+  <!-- This will take care of lauching a pointgrey camera nodelet with an associated image_proc debayer node. -->
+  <!-- This example is intended for simple testing. -->
+  
+  <!--node pkg="pointgrey_camera_driver" type="pointgrey_camera_node" name="pg_node" output="screen">
+    <param name="serial" value="11290397" />
+    <param name="camera_info_url" value="lalalalala" />
+    <param name="frame_id" value="hehehehhe" />
+  </node-->
+  
+  <node pkg="nodelet" type="nodelet" name="pg_nodelet" output="screen" args="standalone pointgrey_camera_driver/PointGreyCameraNodelet" >
+      <param name="serial" value="11290397" />
+    <param name="camera_info_url" value="lalalalala" />
+    <param name="frame_id" value="hehehehhe" />
+  </node>
+
+</launch>

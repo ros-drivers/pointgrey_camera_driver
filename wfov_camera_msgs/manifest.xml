@@ -1,0 +1,21 @@
+<package>
+  <description brief="wfov_camera_msgs">
+
+     wfov_camera_msgs
+
+  </description>
+  <author>Chad Rockey</author>
+  <license>Government Purpose Rights</license>
+  <review status="unreviewed" notes=""/>
+  <url></url>
+  
+  <depend package="sensor_msgs" />
+  <depend package="rosbag"/> <!-- For migration -->
+
+  <export>
+    <rosbag migration_rule_file="migration_rules/psh_msgs.bmr"/>
+  </export>
+
+</package>
+
+
