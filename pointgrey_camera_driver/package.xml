@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<package>
+  <name>pointgrey_camera_driver</name>
+  <version>0.0.0</version>
+  <description>Point Grey camera driver based on libflycapture2.</description>
+
+  <maintainer email="mpurvis@clearpathrobotics.com">Mike Purvis</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/pointgrey_camera_driver</url>
+
+  <author>Chad Rockey</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>nodelet</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>wfov_camera_msgs</build_depend>
+  <build_depend>image_exposure_msgs</build_depend>
+  <build_depend>camera_info_manager</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>driver_base</build_depend>
+  <build_depend>diagnostic_updater</build_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>nodelet</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>wfov_camera_msgs</run_depend>
+  <run_depend>image_exposure_msgs</run_depend>
+  <run_depend>camera_info_manager</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>driver_base</run_depend>
+  <run_depend>diagnostic_updater</run_depend>
+ 
+  <export></export>
+</package>
