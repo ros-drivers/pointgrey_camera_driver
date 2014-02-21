@@ -37,6 +37,7 @@ add_executable(pointgrey_list_cameras src/list_cameras.cpp)
 target_link_libraries(pointgrey_list_cameras PointGreyCamera ${catkin_LIBRARIES})
  
 install(TARGETS 
+  PointGreyCamera
   PointGreyCameraNodelet
   PointGreyStereoCameraNodelet
   pointgrey_camera_node
