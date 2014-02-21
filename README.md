@@ -1,12 +1,10 @@
-camera-drivers
-==============
+pointgrey_camera_driver
+=======================
 
-ROS-compatible Camera drivers from NREC, part of Carnegie Mellon University's robotics institute.  
+ROS-compatible Camera drivers originally provided by NREC, part of Carnegie Mellon University's robotics institute.
 These drives are included along with modifications of the standard ros image messages that enable HDR and physics based vision.
 
-This code was developed by the National Robotics Engineering Center (NREC), part of the Robotics Institute at Carnegie Mellon University. 
-Its development was funded by DARPA under the LS3 program and submitted for public release on June 7th, 2012. 
-Release was granted on August, 21st 2012 with Distribution Statement "A" (Approved for Public Release, Distribution Unlimited).
+This code was originally developed by the National Robotics Engineering Center (NREC), part of the Robotics Institute at Carnegie Mellon University. Its development was funded by DARPA under the LS3 program and submitted for public release on June 7th, 2012. Release was granted on August, 21st 2012 with Distribution Statement "A" (Approved for Public Release, Distribution Unlimited).
 
 This software is released under a BSD license:
 
