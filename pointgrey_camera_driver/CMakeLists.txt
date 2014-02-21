@@ -51,3 +51,7 @@ install(TARGETS
 install(FILES nodelet_plugins.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+install(FILES udev/40-pgr.rules
+  DESTINATION /etc/udev/rules.d
+)
