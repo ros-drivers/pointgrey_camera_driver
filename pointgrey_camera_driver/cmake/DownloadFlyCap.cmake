@@ -23,7 +23,6 @@ function(download_flycap POINTGREY_LIB_VAR POINTGREY_INCLUDE_DIR_VAR)
     file(DOWNLOAD "${POINTGREY_URL_BASE}${POINTGREY_ARCHIVE}" 
                   "${CMAKE_CURRENT_BINARY_DIR}/${POINTGREY_ARCHIVE}")
   endif()
-  message("xx ${CMAKE_BINARY_DIR}")
 
   set(POINTGREY_LIB "${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_LIB_DESTINATION}/libflycapture.so.2")
   execute_process(
@@ -32,10 +31,10 @@ function(download_flycap POINTGREY_LIB_VAR POINTGREY_INCLUDE_DIR_VAR)
   execute_process(
     COMMAND dpkg --extract ${POINTGREY_HEADER_DEB_${POINTGREY_ARCH}} ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND dpkg --extract ${POINTGREY_SO_DEB_${POINTGREY_ARCH}} ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/usr/lib/libflycapture.so.2.6.3.2"
-                                     "${POINTGREY_LIB}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/usr/lib/libflycapture.so.2.6.3.2"
+                                     "${POINTGREY_LIB}")
   set(${POINTGREY_LIB_VAR} ${POINTGREY_LIB} PARENT_SCOPE)
   set(${POINTGREY_INCLUDE_DIR_VAR} "${CMAKE_CURRENT_BINARY_DIR}/usr/include" PARENT_SCOPE)
 endfunction()

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(pointgrey_camera_driver)
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp nodelet sensor_msgs wfov_camera_msgs
+  roscpp roslint nodelet sensor_msgs wfov_camera_msgs
   image_exposure_msgs camera_info_manager image_transport
   dynamic_reconfigure driver_base diagnostic_updater)
 
@@ -21,11 +21,13 @@ if(NOT POINTGREY_LIB)
   message(STATUS "libflycapture not found in system library path")
   include(cmake/DownloadFlyCap.cmake)
   download_flycap(POINTGREY_LIB POINTGREY_INCLUDE_DIR) 
+  message(STATUS "libflycapture library: ${POINTGREY_LIB}")
+  message(STATUS "libflycapture include: ${POINTGREY_INCLUDE_DIR}")
   include_directories(${POINTGREY_INCLUDE_DIR})  
 endif()
 
 add_library(PointGreyCamera src/PointGreyCamera.cpp)
-target_link_libraries(PointGreyCamera ${POINTGREY_LIB} ${catkin_LIBRARIES})
+target_link_libraries(PointGreyCamera "${POINTGREY_LIB}" ${catkin_LIBRARIES})
 add_dependencies(PointGreyCamera ${PROJECT_NAME}_gencfg) 
 
 add_library(PointGreyCameraNodelet src/nodelet.cpp)
@@ -63,3 +65,5 @@ install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 # This install will fail when not root.
 install(FILES udev/40-pgr.rules DESTINATION /etc/udev/rules.d)
+
+roslint_cpp()
