@@ -35,6 +35,12 @@
   <run_depend>driver_base</run_depend>
   <run_depend>diagnostic_updater</run_depend>
  
+  <!-- Dependencies of libflycapture -->
+  <build_depend>libusb-1.0-dev</build_depend>
+  <build_depend>libraw1394-dev</build_depend>
+  <run_depend>libusb-1.0-dev</run_depend>
+  <run_depend>libraw1394-dev</run_depend>
+
   <export>
     <nodelet plugin="${prefix}/nodelet_plugins.xml" /> 
   </export>
