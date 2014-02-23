@@ -16,9 +16,16 @@ catkin_package(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-find_library(FLYCAPTURE2 flycapture)
+find_library(POINTGREY_LIB flycapture)
+if(NOT POINTGREY_LIB)
+  message(STATUS "libflycapture not found in system library path")
+  include(cmake/DownloadFlyCap.cmake)
+  download_flycap(POINTGREY_LIB POINTGREY_INCLUDE_DIR) 
+  include_directories(${POINTGREY_INCLUDE_DIR})  
+endif()
+
 add_library(PointGreyCamera src/PointGreyCamera.cpp)
-target_link_libraries(PointGreyCamera ${FLYCAPTURE2} ${catkin_LIBRARIES})
+target_link_libraries(PointGreyCamera ${POINTGREY_LIB} ${catkin_LIBRARIES})
 add_dependencies(PointGreyCamera ${PROJECT_NAME}_gencfg) 
 
 add_library(PointGreyCameraNodelet src/nodelet.cpp)
@@ -48,10 +55,11 @@ install(TARGETS
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(FILES nodelet_plugins.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+install(FILES ${POINTGREY_LIB} DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
-install(FILES udev/40-pgr.rules
-  DESTINATION /etc/udev/rules.d
-)
+install(FILES nodelet_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION} )
+
+install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+# This install will fail when not root.
+install(FILES udev/40-pgr.rules DESTINATION /etc/udev/rules.d)
