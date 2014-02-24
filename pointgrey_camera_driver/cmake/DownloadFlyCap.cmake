@@ -10,6 +10,8 @@ function(download_flycap POINTGREY_LIB_VAR POINTGREY_INCLUDE_DIR_VAR)
 
   set(POINTGREY_SO_DEB_x86_64 "flycapture2-2.6.3.2-amd64/libflycapture-2.6.3.2_amd64.deb")
   set(POINTGREY_HEADER_DEB_x86_64 "flycapture2-2.6.3.2-amd64/libflycapture-2.6.3.2_amd64-dev.deb")
+  set(POINTGREY_SO_DEB_i386 "flycapture2-2.6.3.2-i386/libflycapture-2.6.3.2_i386.deb")
+  set(POINTGREY_HEADER_DEB_i386 "flycapture2-2.6.3.2-i386/libflycapture-2.6.3.2_i386-dev.deb")
 
   target_architecture(POINTGREY_ARCH)
   if(NOT DEFINED POINTGREY_ARCHIVE_${POINTGREY_ARCH})
