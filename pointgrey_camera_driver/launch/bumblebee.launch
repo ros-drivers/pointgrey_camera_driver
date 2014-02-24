@@ -3,12 +3,15 @@
   <!-- This example is intended for simple testing. -->
   
   <group ns="camera">
-    <node pkg="nodelet" type="nodelet" name="pg_nodelet" output="screen" args="standalone pointgrey_camera_driver/PointGreyStereoCameraNodelet" >
+    <node pkg="nodelet" type="nodelet" name="bumblebee_nodelet_manager" args="manager" />
+
+    <node pkg="nodelet" type="nodelet" name="bumblebee_nodelet"
+          args="load pointgrey_camera_driver/PointGreyStereoCameraNodelet bumblebee_nodelet_manager" >
       <param name="frame_id" value="bumblebee" />
 
       <param name="first_namespace" value="left" />
       <param name="second_namespace" value="right" />
-
+	
       <!-- Determine this using rosrun pointgrey_camera_driver list_cameras.
            If not specified, defaults to first camera found. -->
       <!--param name="serial" value="10151688" /-->
