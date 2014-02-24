@@ -14,8 +14,11 @@ catkin_package(
   CATKIN_DEPENDS roscpp nodelet
 )
 
-include_directories(include ${catkin_INCLUDE_DIRS})
-
+# If the user has manually installed flycapture, use the system path version. If not,
+# download it. We can't resolve this dependency using the usual rosdep means because
+# the Point Grey EULA prohibits redistributing the headers or the packages which
+# contains them. Fortunately, we can download the archive directly from their 
+# website during this build process.
 find_library(POINTGREY_LIB flycapture)
 if(NOT POINTGREY_LIB)
   message(STATUS "libflycapture not found in system library path")
@@ -26,8 +29,10 @@ if(NOT POINTGREY_LIB)
   include_directories(${POINTGREY_INCLUDE_DIR})  
 endif()
 
+include_directories(include ${catkin_INCLUDE_DIRS})
+
 add_library(PointGreyCamera src/PointGreyCamera.cpp)
-target_link_libraries(PointGreyCamera "${POINTGREY_LIB}" ${catkin_LIBRARIES})
+target_link_libraries(PointGreyCamera ${POINTGREY_LIB} ${catkin_LIBRARIES})
 add_dependencies(PointGreyCamera ${PROJECT_NAME}_gencfg) 
 
 add_library(PointGreyCameraNodelet src/nodelet.cpp)
@@ -57,6 +62,8 @@ install(TARGETS
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Redistributing the flycapture .so file is permitted by the SDK EULA:
+# http://www.ptgrey.com/support/kb/data/PGR-FlyCap-SDK-LA.pdf
 install(FILES ${POINTGREY_LIB} DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 install(FILES nodelet_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION} )
