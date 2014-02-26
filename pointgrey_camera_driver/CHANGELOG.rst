@@ -2,6 +2,12 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove pgrimaging from all USB devices.
+* Rename standalone executables, fix priority of udev rules for USB cameras, parameterize example launchfiles better.
+* Contributors: Mike Purvis
+
 0.0.2 (2014-02-26)
 ------------------
 * Permissions to world-readable for firewire devices.
