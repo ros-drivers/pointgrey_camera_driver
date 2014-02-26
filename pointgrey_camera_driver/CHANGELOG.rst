@@ -2,6 +2,14 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Permissions to world-readable for firewire devices.
+* Add nodelet manager to example launch.
+* Reorganize bumblebee example launcher.
+* Fix installing to i386.
+* Contributors: Mike Purvis
+
 0.0.1 (2014-02-23)
 ------------------
 * Fetch FlyCap dependency from pygrey.com at configure time.
