@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.2 (2014-02-26)
+------------------
 * Permissions to world-readable for firewire devices.
 * Add nodelet manager to example launch.
 * Reorganize bumblebee example launcher.
