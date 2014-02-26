@@ -27,4 +27,3 @@ ATTRS{idVendor}=="1e10", ATTRS{idProduct}=="3300", MODE="0666", GROUP="pgrimagin
 KERNEL=="raw1394", MODE="0666", GROUP="pgrimaging"
 KERNEL=="video1394*", MODE="0666", GROUP="pgrimaging"
 SUBSYSTEM=="firewire", MODE="0666", GROUP="pgrimaging"
-SUBSYSTEM=="usb", GROUP="pgrimaging"
