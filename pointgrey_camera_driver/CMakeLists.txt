@@ -43,12 +43,18 @@ target_link_libraries(PointGreyStereoCameraNodelet PointGreyCamera ${catkin_LIBR
 
 add_executable(pointgrey_camera_node src/node.cpp)
 target_link_libraries(pointgrey_camera_node PointGreyCamera ${catkin_LIBRARIES})
+set_target_properties(pointgrey_camera_node
+                      PROPERTIES OUTPUT_NAME camera_node PREFIX "")
 
 add_executable(pointgrey_stereo_node src/stereo_node.cpp)
 target_link_libraries(pointgrey_stereo_node PointGreyCamera ${catkin_LIBRARIES})
+set_target_properties(pointgrey_stereo_node
+                      PROPERTIES OUTPUT_NAME stereo_node PREFIX "")
 
 add_executable(pointgrey_list_cameras src/list_cameras.cpp)
 target_link_libraries(pointgrey_list_cameras PointGreyCamera ${catkin_LIBRARIES})
+set_target_properties(pointgrey_list_cameras
+                      PROPERTIES OUTPUT_NAME list_cameras PREFIX "")
  
 install(TARGETS 
   PointGreyCamera
@@ -71,6 +77,6 @@ install(FILES nodelet_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION
 install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 # This install will fail when not root.
-install(FILES udev/40-pgr.rules DESTINATION /etc/udev/rules.d)
+install(FILES udev/71-pgr.rules DESTINATION /etc/udev/rules.d)
 
 roslint_cpp()

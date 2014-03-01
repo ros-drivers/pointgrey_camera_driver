@@ -1,7 +1,9 @@
 <launch>
-  <!-- This will take care of lauching a pointgrey camera with an associated stereo image_proc node. -->
-  <!-- This example is intended for simple testing. -->
-  
+  <!-- Determine this using rosrun pointgrey_camera_driver list_cameras.
+       If not specified, defaults to first camera found. -->
+  <arg name="bumblebee_serial" default="0" />
+  <arg name="calibrated" default="0" />
+
   <group ns="camera">
     <node pkg="nodelet" type="nodelet" name="bumblebee_nodelet_manager" args="manager" />
 
@@ -12,12 +14,13 @@
       <param name="first_namespace" value="left" />
       <param name="second_namespace" value="right" />
 	
-      <!-- Determine this using rosrun pointgrey_camera_driver list_cameras.
-           If not specified, defaults to first camera found. -->
-      <!--param name="serial" value="10151688" /-->
+      <param name="serial" value="$(arg bumblebee_serial)" />
       
-      <!--param name="camera_info_url" value="file:///home/chadrockey/.ros/camera_info/10151688.yaml" /-->
-      <!--param name="second_info_url" value="file:///home/chadrockey/.ros/camera_info/10151688_right.yaml" /-->
+      <!-- Use the camera_calibration package to create these files -->
+      <param name="camera_info_url" if="$(arg calibrated)"
+             value="file://$(env HOME)/.ros/camera_info/$(arg bumblebee_serial).yaml" />
+      <param name="second_info_url" if="$(arg calibrated)"
+             value="file://$(env HOME)/.ros/camera_info/$(arg bumblebee_serial)_right.yaml" />
     </node>
   </group>
 </launch>
