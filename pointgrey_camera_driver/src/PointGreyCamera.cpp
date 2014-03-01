@@ -665,17 +665,31 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
     
     // Set the image encoding
     std::string imageEncoding = sensor_msgs::image_encodings::MONO8;
-    if(cInfo.isColorCamera && rawImage.GetBayerTileFormat() != NONE){
+    BayerTileFormat bayer_format = rawImage.GetBayerTileFormat();
+    if(cInfo.isColorCamera && bayer_format != NONE){
       if(bitsPerPixel == 16){
-	imageEncoding = sensor_msgs::image_encodings::MONO16; // 16 bit bayer not supported yet in ROS
+	      imageEncoding = sensor_msgs::image_encodings::MONO16; // 16 bit bayer not supported yet in ROS
       } else {
-	imageEncoding = sensor_msgs::image_encodings::BAYER_GBRG8;
+        switch(bayer_format) {
+          case RGGB:
+            imageEncoding = sensor_msgs::image_encodings::BAYER_RGGB8;
+            break;
+          case GRBG:
+            imageEncoding = sensor_msgs::image_encodings::BAYER_GRBG8;
+            break;
+          case GBRG:
+            imageEncoding = sensor_msgs::image_encodings::BAYER_GBRG8;
+            break;
+          case BGGR:
+            imageEncoding = sensor_msgs::image_encodings::BAYER_BGGR8;
+            break;
+        }
       }
     } else { // Mono camera or in pixel binned mode.
       if(bitsPerPixel == 16){
-	imageEncoding = sensor_msgs::image_encodings::MONO16;
+	      imageEncoding = sensor_msgs::image_encodings::MONO16;
       } else {
-	imageEncoding = sensor_msgs::image_encodings::MONO8;
+	      imageEncoding = sensor_msgs::image_encodings::MONO8;
       }
     }
     
