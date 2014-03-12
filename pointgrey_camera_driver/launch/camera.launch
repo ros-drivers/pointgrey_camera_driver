@@ -16,5 +16,9 @@
       <param name="camera_info_url" if="$(arg calibrated)"
              value="file://$(env HOME)/.ros/camera_info/$(arg camera_serial).yaml" />
     </node>
+
+    <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
+          args="load image_proc/debayer camera_nodelet_manager">
+    </node>
   </group>
 </launch>
