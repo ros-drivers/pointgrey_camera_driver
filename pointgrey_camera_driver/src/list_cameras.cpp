@@ -40,7 +40,11 @@ int main(int argc, char **argv)
     std::vector<uint32_t> serials_list = pg_.getAttachedCameras();
     if(serials_list.size() == 0)
     {
-      std::cout << "No PointGrey cameras are active on this computer." << std::endl;
+      std::cout << "No PointGrey cameras detected on this computer." << std::endl;
+
+      std::cout << std::endl
+                << "Note that you may need to restart udev and replug your camera, eg:" << std::endl
+                << "  sudo service udev restart" << std::endl;
     }
     else
     {
