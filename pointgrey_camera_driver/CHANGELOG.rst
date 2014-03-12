@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.9.1 (2014-03-12)
+------------------
 * Add note to the list_cameras tool about restarting udev.
 * Add debayering nodelet to example launcher for monocular camera. Tested with a USB Firefly.
 * Automatic lint fixes from astyle.
