@@ -2,6 +2,12 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added dpkg to build_depend
+  During builds, dpkg is explicitly called. This tool is not necessarily on all systems, so we should make sure it is installed during the build.
+* Contributors: Scott K Logan
+
 0.9.1 (2014-03-12)
 ------------------
 * Add note to the list_cameras tool about restarting udev.
