@@ -425,11 +425,6 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
 {
   // return true if we can set values as desired.
   bool retVal = true;
-  Property prop;
-  prop.type = type;
-  prop.autoManualMode = autoSet;
-  prop.absControl = false;
-  prop.onOff = true;
 
   PropertyInfo pInfo;
   pInfo.type = type;
@@ -438,6 +433,12 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
 
   if(pInfo.present)
   {
+    Property prop;
+    prop.type = type;
+    prop.autoManualMode = (autoSet && pInfo.autoSupported);
+    prop.absControl = false;
+    prop.onOff = pInfo.onOffSupported;
+
     if(valueA < pInfo.min)
     {
       valueA = pInfo.min;
@@ -485,11 +486,6 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
 {
   // return true if we can set values as desired.
   bool retVal = true;
-  Property prop;
-  prop.type = type;
-  prop.autoManualMode = autoSet;
-  prop.absControl = true;
-  prop.onOff = true;
 
   PropertyInfo pInfo;
   pInfo.type = type;
@@ -498,6 +494,12 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
 
   if(pInfo.present)
   {
+    Property prop;
+    prop.type = type;
+    prop.autoManualMode = (autoSet && pInfo.autoSupported);
+    prop.absControl = pInfo.absValSupported;
+    prop.onOff = pInfo.onOffSupported;
+
     if(value < pInfo.absMin)
     {
       value = pInfo.absMin;
@@ -540,16 +542,16 @@ bool PointGreyCamera::setWhiteBalance(uint16_t &blue, uint16_t &red)
   if(cInfo.isColorCamera && blue > 0 && red > 0)  ///< @todo 11/15 hack to ignore white balance changes.
   {
     // return true if we can set values as desired.
-    Property prop;
-    prop.type = WHITE_BALANCE;
-    prop.autoManualMode = false;
-    prop.absControl = false;
-    prop.onOff = true;
-
     PropertyInfo pInfo;
     pInfo.type = WHITE_BALANCE;
     error = cam_.GetPropertyInfo(&pInfo);
     PointGreyCamera::handleError("PointGreyCamera::setWhiteBalance Could not get property info.", error);
+
+    Property prop;
+    prop.type = WHITE_BALANCE;
+    prop.autoManualMode = (false || !pInfo.manualSupported);
+    prop.absControl = false;
+    prop.onOff = pInfo.onOffSupported;
 
     if(blue < pInfo.min)
     {
