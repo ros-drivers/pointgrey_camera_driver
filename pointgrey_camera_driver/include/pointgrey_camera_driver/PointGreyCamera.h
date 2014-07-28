@@ -261,10 +261,11 @@ private:
   * \param source The desired external triggering source.
   * \param parameter The parameter currently only used by trigger mode 3 (skip N frames, where parameter is N).
   * \param delay The delay in seconds to wait after being triggered.
+  * \param polarityHigh Whether the polarity of the triggering signal is high.
   *
   * \return Returns true when the configuration could be applied without modification.
   */
-  bool setExternalTrigger(bool &enable, std::string &mode, std::string &source, int32_t &parameter, double &delay);
+  bool setExternalTrigger(bool &enable, std::string &mode, std::string &source, int32_t &parameter, double &delay, bool &polarityHigh);
 
   /*!
   * \brief Handles errors returned by FlyCapture2.

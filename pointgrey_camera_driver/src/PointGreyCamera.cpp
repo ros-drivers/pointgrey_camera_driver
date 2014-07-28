@@ -132,7 +132,19 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   config.white_balance_red = red;
 
   // Set trigger
-  retVal &= PointGreyCamera::setExternalTrigger(config.enable_trigger, config.trigger_mode, config.trigger_source, config.trigger_parameter, config.trigger_delay);
+  switch (config.trigger_polarity)
+  {
+    case pointgrey_camera_driver::PointGrey_Low:
+    case pointgrey_camera_driver::PointGrey_High:
+      {
+      bool temp = config.trigger_polarity;
+      retVal &= PointGreyCamera::setExternalTrigger(config.enable_trigger, config.trigger_mode, config.trigger_source, config.trigger_parameter, config.trigger_delay, temp);
+      config.strobe1_polarity = temp;
+      }
+      break;
+    default:
+      retVal &= false;
+  }
 
   return retVal;
 }
@@ -630,7 +642,7 @@ float PointGreyCamera::getCameraFrameRate()
   return fProp.absValue;
 }
 
-bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::string &source, int32_t &parameter, double &delay)
+bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::string &source, int32_t &parameter, double &delay, bool &polarityHigh)
 {
   // return true if we can set values as desired.
   bool retVal = true;
@@ -704,6 +716,8 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
     source = "gpio0";
     retVal &= false;
   }
+
+  triggerMode.polarity = polarityHigh;
 
   error = cam_.SetTriggerMode(&triggerMode);
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not set trigger mode.", error);
