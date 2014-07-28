@@ -146,6 +146,21 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
       retVal &= false;
   }
 
+  // Set strobe
+  switch (config.strobe1_polarity)
+  {
+    case pointgrey_camera_driver::PointGrey_Low:
+    case pointgrey_camera_driver::PointGrey_High:
+      {
+      bool temp = config.strobe1_polarity;
+      retVal &= PointGreyCamera::setExternalStrobe(config.enable_strobe1, pointgrey_camera_driver::PointGrey_GPIO1, config.strobe1_duration, config.strobe1_delay, temp);
+      config.strobe1_polarity = temp;
+      }
+      break;
+    default:
+      retVal &= false;
+  }
+
   return retVal;
 }
 
@@ -640,6 +655,61 @@ float PointGreyCamera::getCameraFrameRate()
   PointGreyCamera::handleError("PointGreyCamera::getCameraFrameRate Could not get property.", error);
   std::cout << "Frame Rate is: " << fProp.absValue << std::endl;
   return fProp.absValue;
+}
+
+bool PointGreyCamera::setExternalStrobe(bool &enable, const std::string &dest, double &duration, double &delay, bool &polarityHigh)
+{
+  // return true if we can set values as desired.
+  bool retVal = true;
+
+  // Check strobe source
+  int pin;
+  if(dest.compare("gpio0") == 0)
+  {
+    pin = 0;
+  }
+  else if(dest.compare("gpio1") == 0)
+  {
+    pin = 1;
+  }
+  else if(dest.compare("gpio2") == 0)
+  {
+    pin = 2;
+  }
+  else if(dest.compare("gpio3") == 0)
+  {
+    pin = 3;
+  }
+  else
+  {
+    // Unrecognized source
+    return false;
+  }
+  // Check for external trigger support
+  StrobeInfo strobeInfo;
+  strobeInfo.source = pin;
+  Error error = cam_.GetStrobeInfo(&strobeInfo);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalStrobe Could not check external strobe support.", error);
+  if(strobeInfo.present != true)
+  {
+    // Camera doesn't support external strobes on this pin, so set enable_strobe to false
+    enable = false;
+    return false;
+  }
+
+  StrobeControl strobeControl;
+  strobeControl.source = pin;
+  error = cam_.GetStrobe(&strobeControl);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalStrobe Could not get strobe control.", error);
+  strobeControl.duration = duration;
+  strobeControl.delay = delay;
+  strobeControl.onOff = enable;
+  strobeControl.polarity = polarityHigh;
+
+  error = cam_.SetStrobe(&strobeControl);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalStrobe Could not set strobe control.", error);
+
+  return retVal;
 }
 
 bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::string &source, int32_t &parameter, double &delay, bool &polarityHigh)
