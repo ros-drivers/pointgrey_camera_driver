@@ -646,6 +646,8 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   }
 
   TriggerMode triggerMode;
+  error = cam_.GetTriggerMode(&triggerMode);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not get trigger mode.", error);
   triggerMode.onOff = enable;
 
   // Set trigger mode
