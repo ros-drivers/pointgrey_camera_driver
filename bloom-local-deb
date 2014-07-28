@@ -1,0 +1,50 @@
+#!/bin/bash
+
+git rev-parse
+if [[ "$?" != "0" ]]; then
+  echo "This directory is not a git repo!"
+  exit 1
+fi
+
+GIT_REMOTE_URL=$(git config --get remote.origin.url)
+
+TEMPDIR=$(mktemp -d --tmpdir $(basename $(pwd)).XXXX)
+mkdir $TEMPDIR/gbp
+pushd $TEMPDIR/gbp
+
+cat <<EOF > tracks.yaml
+tracks:
+  ${ROS_DISTRO}:
+    actions:
+    - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri :{vcs_uri} --name :{name} --output-dir :{archive_dir_path}
+    - git-bloom-import-upstream :{archive_path} :{patches} --release-version :{version} --replace
+    - git-bloom-generate -y rosrelease :{ros_distro} --source upstream -i :{release_inc}
+    - git-bloom-generate -y rosdebian --prefix release/:{ros_distro} :{ros_distro} -i :{release_inc}
+    devel_branch: master
+    last_version: null
+    name: upstream
+    patches: null
+    release_inc: '0'
+    release_repo_url: null
+    release_tag: :{version}
+    ros_distro: ${ROS_DISTRO}
+    vcs_type: git
+    vcs_uri: ${GIT_REMOTE_URL}
+    version: :{auto}
+EOF
+git init
+git add tracks.yaml
+git commit -m "Add tracks.yaml"
+git-bloom-release ${ROS_DISTRO}
+
+BRANCHES=$(git branch | grep "\sdebian/hydro/$(lsb_release -cs)/")
+for BRANCH in ${BRANCHES}
+do
+  git checkout ${BRANCH}
+  git clean -df
+  git-buildpackage -uc -us  --git-ignore-new
+done
+
+echo 
+echo "Generated:"
+ls -1 $TEMPDIR/*.deb

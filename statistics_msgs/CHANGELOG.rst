@@ -2,6 +2,9 @@
 Changelog for package image_exposure_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.9.2 (2014-07-13)
 ------------------
 
