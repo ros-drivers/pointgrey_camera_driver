@@ -657,6 +657,31 @@ float PointGreyCamera::getCameraFrameRate()
   return fProp.absValue;
 }
 
+static int sourceNumberFromGpioName(const std::string s)
+{
+  if(s.compare("gpio0") == 0)
+  {
+    return 0;
+  }
+  else if(s.compare("gpio1") == 0)
+  {
+    return 1;
+  }
+  else if(s.compare("gpio2") == 0)
+  {
+    return 2;
+  }
+  else if(s.compare("gpio3") == 0)
+  {
+    return 3;
+  }
+  else
+  {
+    // Unrecognized pin
+    return -1;
+  }
+}
+
 bool PointGreyCamera::setExternalStrobe(bool &enable, const std::string &dest, double &duration, double &delay, bool &polarityHigh)
 {
   // return true if we can set values as desired.
@@ -664,23 +689,8 @@ bool PointGreyCamera::setExternalStrobe(bool &enable, const std::string &dest, d
 
   // Check strobe source
   int pin;
-  if(dest.compare("gpio0") == 0)
-  {
-    pin = 0;
-  }
-  else if(dest.compare("gpio1") == 0)
-  {
-    pin = 1;
-  }
-  else if(dest.compare("gpio2") == 0)
-  {
-    pin = 2;
-  }
-  else if(dest.compare("gpio3") == 0)
-  {
-    pin = 3;
-  }
-  else
+  pin = sourceNumberFromGpioName(dest);
+  if (pin < 0)
   {
     // Unrecognized source
     return false;
@@ -763,28 +773,17 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
 
   // Set trigger source
   std::string tsource = source;
-  if(tsource.compare("gpio0") == 0)
-  {
-    triggerMode.source = 0;
-  }
-  else if(tsource.compare("gpio1") == 0)
-  {
-    triggerMode.source = 1;
-  }
-  else if(tsource.compare("gpio2") == 0)
-  {
-    triggerMode.source = 2;
-  }
-  else if(tsource.compare("gpio3") == 0)
-  {
-    triggerMode.source = 3;
-  }
-  else
+  int pin = sourceNumberFromGpioName(tsource);
+  if (pin < 0)
   {
     // Unrecognized source
     triggerMode.source = 0;
     source = "gpio0";
     retVal &= false;
+  }
+  else
+  {
+    triggerMode.source = pin;
   }
 
   triggerMode.polarity = polarityHigh;
