@@ -625,7 +625,7 @@ float PointGreyCamera::getCameraFrameRate()
   Property fProp;
   fProp.type = FRAME_RATE;
   Error error = cam_.GetProperty(&fProp);
-  PointGreyCamera::handleError("PointGreyCamera::getCameraTemperature Could not get property.", error);
+  PointGreyCamera::handleError("PointGreyCamera::getCameraFrameRate Could not get property.", error);
   std::cout << "Frame Rate is: " << fProp.absValue << std::endl;
   return fProp.absValue;
 }
