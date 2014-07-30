@@ -32,6 +32,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include "pointgrey_camera_driver/PointGreyCamera.h"
 
 #include <iostream>
+#include <sstream>
 
 using namespace FlyCapture2;
 
@@ -795,6 +796,12 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
 
   error = cam_.SetTriggerMode(&triggerMode);
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not set trigger mode.", error);
+  error = cam_.GetTriggerMode(&triggerMode);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not get trigger mode.", error);
+  enable = triggerMode.onOff;
+  std::stringstream buff;
+  buff << "mode" << triggerMode.mode;
+  mode = buff.str();
 
   /** @todo, check delay min and max values */
 
@@ -806,6 +813,9 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   triggerDelay.onOff = true;
   error = cam_.SetTriggerDelay(&triggerDelay);
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not set trigger delay.", error);
+  error = cam_.GetTriggerDelay(&triggerDelay);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not get trigger delay.", error);
+  delay = triggerDelay.absValue;
 
   return retVal;
 }
