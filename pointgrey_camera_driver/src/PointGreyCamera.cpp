@@ -718,6 +718,11 @@ bool PointGreyCamera::setExternalStrobe(bool &enable, const std::string &dest, d
 
   error = cam_.SetStrobe(&strobeControl);
   PointGreyCamera::handleError("PointGreyCamera::setExternalStrobe Could not set strobe control.", error);
+  error = cam_.GetStrobe(&strobeControl);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalStrobe Could not get strobe control.", error);
+  delay = strobeControl.delay;
+  enable = strobeControl.onOff;
+  polarityHigh = strobeControl.polarity;
 
   return retVal;
 }
