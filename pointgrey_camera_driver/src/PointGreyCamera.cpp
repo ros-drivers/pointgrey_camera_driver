@@ -32,6 +32,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include "pointgrey_camera_driver/PointGreyCamera.h"
 
 #include <iostream>
+#include <sstream>
 
 using namespace FlyCapture2;
 
@@ -132,7 +133,34 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   config.white_balance_red = red;
 
   // Set trigger
-  retVal &= PointGreyCamera::setExternalTrigger(config.enable_trigger, config.trigger_mode, config.trigger_source, config.trigger_parameter, config.trigger_delay);
+  switch (config.trigger_polarity)
+  {
+    case pointgrey_camera_driver::PointGrey_Low:
+    case pointgrey_camera_driver::PointGrey_High:
+      {
+      bool temp = config.trigger_polarity;
+      retVal &= PointGreyCamera::setExternalTrigger(config.enable_trigger, config.trigger_mode, config.trigger_source, config.trigger_parameter, config.trigger_delay, temp);
+      config.strobe1_polarity = temp;
+      }
+      break;
+    default:
+      retVal &= false;
+  }
+
+  // Set strobe
+  switch (config.strobe1_polarity)
+  {
+    case pointgrey_camera_driver::PointGrey_Low:
+    case pointgrey_camera_driver::PointGrey_High:
+      {
+      bool temp = config.strobe1_polarity;
+      retVal &= PointGreyCamera::setExternalStrobe(config.enable_strobe1, pointgrey_camera_driver::PointGrey_GPIO1, config.strobe1_duration, config.strobe1_delay, temp);
+      config.strobe1_polarity = temp;
+      }
+      break;
+    default:
+      retVal &= false;
+  }
 
   return retVal;
 }
@@ -625,12 +653,82 @@ float PointGreyCamera::getCameraFrameRate()
   Property fProp;
   fProp.type = FRAME_RATE;
   Error error = cam_.GetProperty(&fProp);
-  PointGreyCamera::handleError("PointGreyCamera::getCameraTemperature Could not get property.", error);
+  PointGreyCamera::handleError("PointGreyCamera::getCameraFrameRate Could not get property.", error);
   std::cout << "Frame Rate is: " << fProp.absValue << std::endl;
   return fProp.absValue;
 }
 
-bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::string &source, int32_t &parameter, double &delay)
+static int sourceNumberFromGpioName(const std::string s)
+{
+  if(s.compare("gpio0") == 0)
+  {
+    return 0;
+  }
+  else if(s.compare("gpio1") == 0)
+  {
+    return 1;
+  }
+  else if(s.compare("gpio2") == 0)
+  {
+    return 2;
+  }
+  else if(s.compare("gpio3") == 0)
+  {
+    return 3;
+  }
+  else
+  {
+    // Unrecognized pin
+    return -1;
+  }
+}
+
+bool PointGreyCamera::setExternalStrobe(bool &enable, const std::string &dest, double &duration, double &delay, bool &polarityHigh)
+{
+  // return true if we can set values as desired.
+  bool retVal = true;
+
+  // Check strobe source
+  int pin;
+  pin = sourceNumberFromGpioName(dest);
+  if (pin < 0)
+  {
+    // Unrecognized source
+    return false;
+  }
+  // Check for external trigger support
+  StrobeInfo strobeInfo;
+  strobeInfo.source = pin;
+  Error error = cam_.GetStrobeInfo(&strobeInfo);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalStrobe Could not check external strobe support.", error);
+  if(strobeInfo.present != true)
+  {
+    // Camera doesn't support external strobes on this pin, so set enable_strobe to false
+    enable = false;
+    return false;
+  }
+
+  StrobeControl strobeControl;
+  strobeControl.source = pin;
+  error = cam_.GetStrobe(&strobeControl);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalStrobe Could not get strobe control.", error);
+  strobeControl.duration = duration;
+  strobeControl.delay = delay;
+  strobeControl.onOff = enable;
+  strobeControl.polarity = polarityHigh;
+
+  error = cam_.SetStrobe(&strobeControl);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalStrobe Could not set strobe control.", error);
+  error = cam_.GetStrobe(&strobeControl);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalStrobe Could not get strobe control.", error);
+  delay = strobeControl.delay;
+  enable = strobeControl.onOff;
+  polarityHigh = strobeControl.polarity;
+
+  return retVal;
+}
+
+bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::string &source, int32_t &parameter, double &delay, bool &polarityHigh)
 {
   // return true if we can set values as desired.
   bool retVal = true;
@@ -646,6 +744,8 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   }
 
   TriggerMode triggerMode;
+  error = cam_.GetTriggerMode(&triggerMode);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not get trigger mode.", error);
   triggerMode.onOff = enable;
 
   // Set trigger mode
@@ -679,32 +779,29 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
 
   // Set trigger source
   std::string tsource = source;
-  if(tsource.compare("gpio0") == 0)
-  {
-    triggerMode.source = 0;
-  }
-  else if(tsource.compare("gpio1") == 0)
-  {
-    triggerMode.source = 1;
-  }
-  else if(tsource.compare("gpio2") == 0)
-  {
-    triggerMode.source = 2;
-  }
-  else if(tsource.compare("gpio3") == 0)
-  {
-    triggerMode.source = 3;
-  }
-  else
+  int pin = sourceNumberFromGpioName(tsource);
+  if (pin < 0)
   {
     // Unrecognized source
     triggerMode.source = 0;
     source = "gpio0";
     retVal &= false;
   }
+  else
+  {
+    triggerMode.source = pin;
+  }
+
+  triggerMode.polarity = polarityHigh;
 
   error = cam_.SetTriggerMode(&triggerMode);
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not set trigger mode.", error);
+  error = cam_.GetTriggerMode(&triggerMode);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not get trigger mode.", error);
+  enable = triggerMode.onOff;
+  std::stringstream buff;
+  buff << "mode" << triggerMode.mode;
+  mode = buff.str();
 
   /** @todo, check delay min and max values */
 
@@ -716,6 +813,9 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   triggerDelay.onOff = true;
   error = cam_.SetTriggerDelay(&triggerDelay);
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not set trigger delay.", error);
+  error = cam_.GetTriggerDelay(&triggerDelay);
+  PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not get trigger delay.", error);
+  delay = triggerDelay.absValue;
 
   return retVal;
 }

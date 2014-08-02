@@ -261,10 +261,28 @@ private:
   * \param source The desired external triggering source.
   * \param parameter The parameter currently only used by trigger mode 3 (skip N frames, where parameter is N).
   * \param delay The delay in seconds to wait after being triggered.
+  * \param polarityHigh Whether the polarity of the triggering signal is high.
   *
   * \return Returns true when the configuration could be applied without modification.
   */
-  bool setExternalTrigger(bool &enable, std::string &mode, std::string &source, int32_t &parameter, double &delay);
+  bool setExternalTrigger(bool &enable, std::string &mode, std::string &source, int32_t &parameter, double &delay, bool &polarityHigh);
+
+  /*!
+  * \brief Will set the external strobe of the camera.
+  *
+  * This function will enable external strobing of the camera on the specifed pin and set the desired duration, and delay.
+  * Note that unlike the trigger, multiple output strobes on different pins are quite possible; each output can be enable
+  * and disabled separately.
+  *
+  * \param enable Whether or not to use enable strobing on the give pin.
+  * \param dest The pin to modify.
+  * \param delay The delay in milliseconds to wait after image capture.
+  * \param duration The length in milliseconds to hold the strobe.
+  * \param polarityHigh Whether the polarity of the strobe signal is high.
+  *
+  * \return Returns true when the configuration could be applied without modification.
+  */
+  bool setExternalStrobe(bool &enable, const std::string &dest, double &duration, double &delay, bool &polarityHigh);
 
   /*!
   * \brief Handles errors returned by FlyCapture2.
