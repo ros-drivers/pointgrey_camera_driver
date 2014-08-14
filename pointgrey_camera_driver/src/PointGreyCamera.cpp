@@ -990,15 +990,35 @@ void PointGreyCamera::grabStereoImage(sensor_msgs::Image &image, const std::stri
     error = cam_.GetCameraInfo(&cInfo);
     PointGreyCamera::handleError("PointGreyCamera::grabStereoImage  Failed to get camera info.", error);
 
+    // GetBitsPerPixel returns 16, but that seems to mean "2 8 bit pixels, 
+    // one for each image". Therefore, we don't use it
+    //uint8_t bitsPerPixel = rawImage.GetBitsPerPixel();
+
     // Set the image encoding
     std::string imageEncoding = sensor_msgs::image_encodings::MONO8;
-    if(cInfo.isColorCamera)
+    BayerTileFormat bayer_format = rawImage.GetBayerTileFormat();
+
+    if(cInfo.isColorCamera && bayer_format != NONE)
     {
-      imageEncoding = sensor_msgs::image_encodings::BAYER_GRBG8;
+        switch(bayer_format)
+        {
+        case RGGB:
+          imageEncoding = sensor_msgs::image_encodings::BAYER_RGGB8;
+          break;
+        case GRBG:
+          imageEncoding = sensor_msgs::image_encodings::BAYER_GRBG8;
+          break;
+        case GBRG:
+          imageEncoding = sensor_msgs::image_encodings::BAYER_GBRG8;
+          break;
+        case BGGR:
+          imageEncoding = sensor_msgs::image_encodings::BAYER_BGGR8;
+          break;
+        }
     }
     else     // Mono camera
     {
-      imageEncoding = sensor_msgs::image_encodings::MONO8;
+        imageEncoding = sensor_msgs::image_encodings::MONO8;
     }
 
     // Set up the output images
