@@ -1018,7 +1018,7 @@ void PointGreyCamera::grabStereoImage(sensor_msgs::Image &image, const std::stri
     }
     else     // Mono camera
     {
-        imageEncoding = sensor_msgs::image_encodings::MONO8;
+      imageEncoding = sensor_msgs::image_encodings::MONO8;
     }
 
     // Set up the output images
