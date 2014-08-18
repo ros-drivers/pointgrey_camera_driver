@@ -10,6 +10,7 @@
     <node pkg="nodelet" type="nodelet" name="camera_nodelet"
           args="load pointgrey_camera_driver/PointGreyCameraNodelet camera_nodelet_manager" >
       <param name="frame_id" value="camera" />
+      <param name="frame_rate" value="" />
       <param name="serial" value="$(arg camera_serial)" />
       
       <!-- Use the camera_calibration package to create this file -->
