@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.10.0 (2014-08-18)
+-------------------
 * Added frame rate parameter to launchfiles.
 * Fixing lack of dynamic Bayer format detection/incorrect fixed Bayer format detection in the stereo driver, tested on BB2 hardware
 * Should prevent multiple camera nodes from conflicting.
