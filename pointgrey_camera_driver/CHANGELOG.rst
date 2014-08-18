@@ -2,6 +2,21 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added frame rate parameter to launchfiles.
+* Fixing lack of dynamic Bayer format detection/incorrect fixed Bayer format detection in the stereo driver, tested on BB2 hardware
+* Should prevent multiple camera nodes from conflicting.
+* Read camera's resulting trigger configuration.
+* Read camera's resulting strobe configuration.
+* Refactor GPIO pin comparison into separate function.
+* Support outputting strobes.
+* Enable altering trigger polarities.
+* Don't overwrite currently unused fields.
+* Modify firewire rule per issue `#6 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/6>`_
+* Make sure camera properties are supported before enabling them
+* Contributors: Aaron Denney, Jake Bruce, Jeff Schmidt, Mike Purvis, Ryan Gariepy
+
 0.9.2 (2014-07-13)
 ------------------
 * Added dpkg to build_depend
