@@ -10,6 +10,7 @@
     <node pkg="nodelet" type="nodelet" name="bumblebee_nodelet"
           args="load pointgrey_camera_driver/PointGreyStereoCameraNodelet bumblebee_nodelet_manager" >
       <param name="frame_id" value="bumblebee" />
+      <param name="frame_rate" value="15" />
       <param name="first_namespace" value="left" />
       <param name="second_namespace" value="right" />
       <param name="serial" value="$(arg bumblebee_serial)" />
