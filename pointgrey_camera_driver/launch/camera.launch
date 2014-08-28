@@ -14,7 +14,7 @@
 
       <!-- When unspecified, the driver will use the default framerate as given by the
            camera itself. Use this parameter to override that value for cameras capable of
-           other framerates.
+           other framerates. -->
       <!-- <param name="frame_rate" value="15" /> -->
       
       <!-- Use the camera_calibration package to create this file -->
