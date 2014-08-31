@@ -285,6 +285,16 @@ private:
   bool setExternalStrobe(bool &enable, const std::string &dest, double &duration, double &delay, bool &polarityHigh);
 
   /*!
+  * \brief Will autoconfigure the packet size of the GigECamera with the given GUID.
+  *
+  * Note that this is expected only to work for GigE cameras, and only if the camera
+  * is not connected.
+  *
+  * \param guid the camera to autoconfigure
+  */
+  void setupGigEPacketSize(FlyCapture2::PGRGuid & guid);
+
+  /*!
   * \brief Handles errors returned by FlyCapture2.
   *
   * Checks the status of a FlyCapture2::Error and if there is an error, will throw a runtime_error
