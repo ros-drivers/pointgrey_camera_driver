@@ -820,6 +820,11 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   return retVal;
 }
 
+void PointGreyCamera::setGigEParameters(bool auto_packet_size, unsigned int packet_size)
+{
+  auto_packet_size_ = auto_packet_size;
+  packet_size_ = packet_size;
+}
 
 void PointGreyCamera::setupGigEPacketSize(PGRGuid & guid)
 {
@@ -839,6 +844,18 @@ void PointGreyCamera::setupGigEPacketSize(PGRGuid & guid)
   PointGreyCamera::handleError("PointGreyCamera::connect could not set GigE packet_size", error);
 }
 
+void PointGreyCamera::setupGigEPacketSize(PGRGuid & guid, unsigned int packet_size)
+{
+  GigECamera cam;
+  Error error;
+  error = cam.Connect(&guid);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not connect as GigE camera", error);
+  GigEProperty prop;
+  prop.propType = PACKET_SIZE;
+  prop.value = packet_size;
+  error = cam.SetGigEProperty(&prop);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not set GigE packet_size", error);
+}
 
 void PointGreyCamera::connect()
 {
@@ -865,7 +882,10 @@ void PointGreyCamera::connect()
     PointGreyCamera::handleError("PointGreyCamera::connect Failed to get interface style of camera", error);
     if (ifType == FlyCapture2::INTERFACE_GIGE)
     {
-      setupGigEPacketSize(guid);
+        if (auto_packet_size_)
+            setupGigEPacketSize(guid);   
+        else
+            setupGigEPacketSize(guid, packet_size_);             
     }
 
     error = cam_.Connect(&guid);
