@@ -248,9 +248,10 @@ private:
     // Get GigE camera parameters:
     pnh.param<int>("packet_size", packet_size_, 1400);
     pnh.param<bool>("auto_packet_size", auto_packet_size_, true);
+    pnh.param<int>("packet_delay", packet_delay_, 4000);
 
     // Set GigE parameters:
-    pg_.setGigEParameters(auto_packet_size_, packet_size_);         
+    pg_.setGigEParameters(auto_packet_size_, packet_size_, packet_delay_);         
 
     // Get the location of our camera config yaml
     std::string camera_info_url;
@@ -435,6 +436,8 @@ private:
   bool auto_packet_size_;
   /// GigE packet size:
   int packet_size_;
+  /// GigE packet delay:
+  int packet_delay_;
 };
 
 PLUGINLIB_DECLARE_CLASS(pointgrey_camera_driver, PointGreyCameraNodelet, pointgrey_camera_driver::PointGreyCameraNodelet, nodelet::Nodelet);  // Needed for Nodelet declaration

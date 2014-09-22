@@ -136,7 +136,7 @@ public:
   * \param auto_packet_size Flag stating if packet size should be automatically determined or not.
   * \param packet_size The packet size value to use if auto_packet_size is false.
   */
-  void setGigEParameters(bool auto_packet_size, unsigned int packet_size);
+  void setGigEParameters(bool auto_packet_size, unsigned int packet_size, unsigned int packet_delay);
 
   std::vector<uint32_t> getAttachedCameras();
 
@@ -180,6 +180,8 @@ private:
   bool auto_packet_size_;
   /// GigE packet size:
   unsigned int packet_size_;
+  /// GigE packet delay:
+  unsigned int packet_delay_;
 
   /*!
   * \brief Changes the video mode of the connected camera.
@@ -318,6 +320,17 @@ private:
   * \param packet_size The packet size value to use.
   */
   void setupGigEPacketSize(FlyCapture2::PGRGuid & guid, unsigned int packet_size);
+  
+  /*!
+  * \brief Will configure the packet delay of the GigECamera with the given GUID to a given value.
+  *
+  * Note that this is expected only to work for GigE cameras, and only if the camera
+  * is not connected.
+  *
+  * \param guid the camera to autoconfigure
+  * \param packet_delay The packet delay value to use.
+  */
+  void setupGigEPacketDelay(FlyCapture2::PGRGuid & guid, unsigned int packet_delay);
 
   /*!
   * \brief Handles errors returned by FlyCapture2.
