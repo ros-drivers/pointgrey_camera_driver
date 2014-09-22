@@ -247,7 +247,7 @@ private:
     
     // Get GigE camera parameters:
     pnh.param<int>("packet_size", packet_size_, 1400);
-    pnh.param<bool>("auto_packet_size", auto_packet_size_, false);
+    pnh.param<bool>("auto_packet_size", auto_packet_size_, true);
 
     // Set GigE parameters:
     pg_.setGigEParameters(auto_packet_size_, packet_size_);         
