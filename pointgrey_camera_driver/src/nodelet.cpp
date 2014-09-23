@@ -98,6 +98,7 @@ private:
       wb_blue_ = config.white_balance_blue;
       wb_red_ = config.white_balance_red;
 
+      /*
       // Store CameraInfo binning information
       if(config.video_mode == "640x480_mono8" || config.video_mode == "format7_mode1")
       {
@@ -114,6 +115,7 @@ private:
         binning_x_ = 0;
         binning_y_ = 0;
       }
+      */
 
       // Store CameraInfo RegionOfInterest information
       if(config.video_mode == "format7_mode0" || config.video_mode == "format7_mode1" || config.video_mode == "format7_mode2")
