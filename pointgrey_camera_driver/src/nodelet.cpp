@@ -236,7 +236,7 @@ private:
   */
   void onInit()
   {
-    // Get nodeHandles
+	// Get nodeHandles
     ros::NodeHandle &nh = getMTNodeHandle();
     ros::NodeHandle &pnh = getMTPrivateNodeHandle();
 
@@ -244,13 +244,21 @@ private:
     int serial;
     pnh.param<int>("serial", serial, 0);
     pg_.setDesiredCamera((uint32_t)serial);
+    
+    // Get GigE camera parameters:
+    pnh.param<int>("packet_size", packet_size_, 1400);
+    pnh.param<bool>("auto_packet_size", auto_packet_size_, true);
+    pnh.param<int>("packet_delay", packet_delay_, 4000);
+
+    // Set GigE parameters:
+    pg_.setGigEParameters(auto_packet_size_, packet_size_, packet_delay_);         
 
     // Get the location of our camera config yaml
     std::string camera_info_url;
     pnh.param<std::string>("camera_info_url", camera_info_url, "");
     // Get the desired frame_id, set to 'camera' if not found
-    pnh.param<std::string>("frame_id", frame_id_, "camera");
-
+    pnh.param<std::string>("frame_id", frame_id_, "camera");    
+    
     // Do not call the connectCb function until after we are done initializing.
     boost::mutex::scoped_lock scopedLock(connect_mutex_);
 
@@ -422,6 +430,14 @@ private:
   size_t roi_height_; ///< Camera Info ROI height
   size_t roi_width_; ///< Camera Info ROI width
   bool do_rectify_; ///< Whether or not to rectify as if part of an image.  Set to false if whole image, and true if in ROI mode.
+  
+  // For GigE cameras:
+  /// If true, GigE packet size is automatically determined, otherwise packet_size_ is used:
+  bool auto_packet_size_;
+  /// GigE packet size:
+  int packet_size_;
+  /// GigE packet delay:
+  int packet_delay_;
 };
 
 PLUGINLIB_DECLARE_CLASS(pointgrey_camera_driver, PointGreyCameraNodelet, pointgrey_camera_driver::PointGreyCameraNodelet, nodelet::Nodelet);  // Needed for Nodelet declaration
