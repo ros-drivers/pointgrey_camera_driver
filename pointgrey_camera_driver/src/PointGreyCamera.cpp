@@ -70,7 +70,7 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     if(vMode == VIDEOMODE_FORMAT7)
     {
       PixelFormat fmt7PixFmt;
-      PointGreyCamera::getFormat7PixelFormatFromString(fmt7Mode, config.format7_color_coding, fmt7PixFmt);
+      PointGreyCamera::getFormat7PixelFormatFromString(config.format7_color_coding, fmt7PixFmt);
       // Oh no, these all need to be converted into uints, so my pass by reference trick doesn't work
       uint16_t uwidth = (uint16_t)config.format7_roi_width;
       uint16_t uheight = (uint16_t)config.format7_roi_height;
@@ -361,7 +361,7 @@ bool PointGreyCamera::getVideoModeFromString(std::string &vmode, FlyCapture2::Vi
   return retVal;
 }
 
-bool PointGreyCamera::getFormat7PixelFormatFromString(FlyCapture2::Mode &fmt7Mode, std::string &sformat, FlyCapture2::PixelFormat &fmt7PixFmt)
+bool PointGreyCamera::getFormat7PixelFormatFromString(std::string &sformat, FlyCapture2::PixelFormat &fmt7PixFmt)
 {
   // return true if we can set values as desired.
   bool retVal = true;
@@ -371,44 +371,32 @@ bool PointGreyCamera::getFormat7PixelFormatFromString(FlyCapture2::Mode &fmt7Mod
   Error error = cam_.GetCameraInfo(&cInfo);
   PointGreyCamera::handleError("PointGreyCamera::getFormat7PixelFormatFromString  Failed to get camera info.", error);
 
-  if(fmt7Mode == MODE_0)   // Only supports raw8 and raw16, since this is Bayer
+  if(cInfo.isColorCamera)
   {
-    if(cInfo.isColorCamera)
+    if(sformat.compare("raw8") == 0)
     {
-      if(sformat.compare("raw8") == 0)
-      {
-        fmt7PixFmt = PIXEL_FORMAT_RAW8;
-      }
-      else if(sformat.compare("raw16") == 0)
-      {
-        fmt7PixFmt = PIXEL_FORMAT_RAW16;
-      }
-      else
-      {
-        sformat = "raw8";
-        fmt7PixFmt = PIXEL_FORMAT_RAW8;
-        retVal &= false;
-      }
+      fmt7PixFmt = PIXEL_FORMAT_RAW8;
     }
-    else     // Is black and white
+    else if(sformat.compare("raw16") == 0)
     {
-      if(sformat.compare("mono8") == 0)
-      {
-        fmt7PixFmt = PIXEL_FORMAT_MONO8;
-      }
-      else if(sformat.compare("mono16") == 0)
-      {
-        fmt7PixFmt = PIXEL_FORMAT_MONO16;
-      }
-      else
-      {
-        sformat = "mono8";
-        fmt7PixFmt = PIXEL_FORMAT_MONO8;
-        retVal &= false;
-      }
+      fmt7PixFmt = PIXEL_FORMAT_RAW16;
+    }
+    else if(sformat.compare("mono8") == 0)
+    {
+      fmt7PixFmt = PIXEL_FORMAT_MONO8;
+    }
+    else if(sformat.compare("mono16") == 0)
+    {
+      fmt7PixFmt = PIXEL_FORMAT_MONO16;
+    }
+    else
+    {
+      sformat = "raw8";
+      fmt7PixFmt = PIXEL_FORMAT_RAW8;
+      retVal &= false;
     }
   }
-  else if(fmt7Mode == MODE_1 || fmt7Mode == MODE_2)     // Only supports mono8 and mono16, since these are made using pixel-binning
+  else     // Is black and white
   {
     if(sformat.compare("mono8") == 0)
     {
@@ -424,27 +412,7 @@ bool PointGreyCamera::getFormat7PixelFormatFromString(FlyCapture2::Mode &fmt7Mod
       fmt7PixFmt = PIXEL_FORMAT_MONO8;
       retVal &= false;
     }
-  }
-  else if(fmt7Mode == MODE_3)
-  {
-    if(cInfo.isColorCamera)
-    {
-      fmt7PixFmt = PIXEL_FORMAT_RAW16;
-      sformat = "raw16";
-    }
-    else
-    {
-      fmt7PixFmt = PIXEL_FORMAT_MONO16;
-      sformat = "mono16";
-    }
-  }
-  else     // Unrecognized mode or format, use safest
-  {
-    fmt7Mode = MODE_0;
-    sformat = "raw8";
-    fmt7PixFmt = PIXEL_FORMAT_RAW8;
-    retVal &= false;
-  }
+  }  
 
   return retVal;
 }
@@ -820,6 +788,12 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   return retVal;
 }
 
+void PointGreyCamera::setGigEParameters(bool auto_packet_size, unsigned int packet_size, unsigned int packet_delay)
+{
+  auto_packet_size_ = auto_packet_size;
+  packet_size_ = packet_size;
+  packet_delay_ = packet_delay;
+}
 
 void PointGreyCamera::setupGigEPacketSize(PGRGuid & guid)
 {
@@ -839,6 +813,31 @@ void PointGreyCamera::setupGigEPacketSize(PGRGuid & guid)
   PointGreyCamera::handleError("PointGreyCamera::connect could not set GigE packet_size", error);
 }
 
+void PointGreyCamera::setupGigEPacketSize(PGRGuid & guid, unsigned int packet_size)
+{
+  GigECamera cam;
+  Error error;
+  error = cam.Connect(&guid);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not connect as GigE camera", error);
+  GigEProperty prop;
+  prop.propType = PACKET_SIZE;
+  prop.value = packet_size;
+  error = cam.SetGigEProperty(&prop);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not set GigE packet_size", error);
+}
+
+void PointGreyCamera::setupGigEPacketDelay(PGRGuid & guid, unsigned int packet_delay)
+{
+  GigECamera cam;
+  Error error;
+  error = cam.Connect(&guid);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not connect as GigE camera", error);
+  GigEProperty prop;
+  prop.propType = PACKET_DELAY;
+  prop.value = packet_delay;
+  error = cam.SetGigEProperty(&prop);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not set GigE packet_delay", error);
+}
 
 void PointGreyCamera::connect()
 {
@@ -865,7 +864,14 @@ void PointGreyCamera::connect()
     PointGreyCamera::handleError("PointGreyCamera::connect Failed to get interface style of camera", error);
     if (ifType == FlyCapture2::INTERFACE_GIGE)
     {
-      setupGigEPacketSize(guid);
+		// Set packet size:
+        if (auto_packet_size_)
+            setupGigEPacketSize(guid);   
+        else
+            setupGigEPacketSize(guid, packet_size_);             
+            
+        // Set packet delay:    
+        setupGigEPacketDelay(guid, packet_delay_);    
     }
 
     error = cam_.Connect(&guid);

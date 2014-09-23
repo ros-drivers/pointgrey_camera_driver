@@ -129,6 +129,14 @@ public:
   * \param id serial number for the camera.  Should be something like 10491081.
   */
   void setDesiredCamera(const uint32_t &id);
+  
+  /*!
+  * \brief Set parameters relative to GigE cameras.
+  *
+  * \param auto_packet_size Flag stating if packet size should be automatically determined or not.
+  * \param packet_size The packet size value to use if auto_packet_size is false.
+  */
+  void setGigEParameters(bool auto_packet_size, unsigned int packet_size, unsigned int packet_delay);
 
   std::vector<uint32_t> getAttachedCameras();
 
@@ -165,7 +173,15 @@ private:
   FlyCapture2::ImageMetadata metadata_; ///< Metadata from the last image, stores useful information such as timestamp, gain, shutter, brightness, exposure.
 
   boost::mutex mutex_; ///< A mutex to make sure that we don't try to grabImages while reconfiguring or vice versa.  Implemented with boost::mutex::scoped_lock.
-  volatile bool captureRunning_; ///< A status boolean that checks if the camera has been started and is loading images into its buffer.
+  volatile bool captureRunning_; ///< A status boolean that checks if the camera has been started and is loading images into its buffer.ù
+  
+  // For GigE cameras:
+  /// If true, GigE packet size is automatically determined, otherwise packet_size_ is used:
+  bool auto_packet_size_;
+  /// GigE packet size:
+  unsigned int packet_size_;
+  /// GigE packet delay:
+  unsigned int packet_delay_;
 
   /*!
   * \brief Changes the video mode of the connected camera.
@@ -212,7 +228,7 @@ private:
   *
   * \return Returns true when the configuration could be applied without modification.
   */
-  bool getFormat7PixelFormatFromString(FlyCapture2::Mode &fmt7Mode, std::string &sformat, FlyCapture2::PixelFormat &fmt7PixFmt);
+  bool getFormat7PixelFormatFromString(std::string &sformat, FlyCapture2::PixelFormat &fmt7PixFmt);
 
   bool setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet,  unsigned int &valueA,  unsigned int &valueB);
 
@@ -293,6 +309,28 @@ private:
   * \param guid the camera to autoconfigure
   */
   void setupGigEPacketSize(FlyCapture2::PGRGuid & guid);
+
+  /*!
+  * \brief Will configure the packet size of the GigECamera with the given GUID to a given value.
+  *
+  * Note that this is expected only to work for GigE cameras, and only if the camera
+  * is not connected.
+  *
+  * \param guid the camera to autoconfigure
+  * \param packet_size The packet size value to use.
+  */
+  void setupGigEPacketSize(FlyCapture2::PGRGuid & guid, unsigned int packet_size);
+  
+  /*!
+  * \brief Will configure the packet delay of the GigECamera with the given GUID to a given value.
+  *
+  * Note that this is expected only to work for GigE cameras, and only if the camera
+  * is not connected.
+  *
+  * \param guid the camera to autoconfigure
+  * \param packet_delay The packet delay value to use.
+  */
+  void setupGigEPacketDelay(FlyCapture2::PGRGuid & guid, unsigned int packet_delay);
 
   /*!
   * \brief Handles errors returned by FlyCapture2.
