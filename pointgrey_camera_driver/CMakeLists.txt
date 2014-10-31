@@ -76,7 +76,4 @@ install(FILES nodelet_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION
 
 install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-# This install will fail when not root.
-install(FILES udev/71-pgr.rules DESTINATION /etc/udev/rules.d)
-
 roslint_cpp()
