@@ -2,6 +2,26 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Change approach to downloading flycapture SDK.
+  The logic which fetches and extracts the archive from ptgrey.com
+  has been moved to a more reasonable and comprehensible python script.
+  This should better pave the way for better future ARM support in this
+  driver.
+* Use dh_installudev for udev rules.
+* The raw and mono pixel formats (raw8, raw16, mono8, mono16) can be selected from dynamic reconfigure with every video mode (while before it was hard coded that only mono pixel formats could be used with mode1 and mode2).
+* Binning information removed from camera_info published by the nodelet.
+* Add image_proc as dependency.
+* Removed changes to binning_x and binning_y in camera info messages (otherwise image_proc node would performs a further downsampling).
+* Now the wrapper allows to set raw and mono pixel formats with any mode.
+* Added possibility to set GigE packet delay as launch/conf parameter.
+* Changed 'auto_packet_size' to 'true' as default.
+* Added possibility to change GigE packet size for GigE cameras.
+* For GigE cameras, automatically discover best packet size.
+* Fix launch file syntax error (XML comments neither nest nor continue).
+* Contributors: Aaron Denney, Jeff Schmidt, Matteo Munaro, Mike Purvis
+
 0.10.0 (2014-08-18)
 -------------------
 * Added frame rate parameter to launchfiles.
