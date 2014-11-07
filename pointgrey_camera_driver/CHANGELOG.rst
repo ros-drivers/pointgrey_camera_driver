@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.11.0 (2014-11-07)
+-------------------
 * Change approach to downloading flycapture SDK.
   The logic which fetches and extracts the archive from ptgrey.com
   has been moved to a more reasonable and comprehensible python script.
