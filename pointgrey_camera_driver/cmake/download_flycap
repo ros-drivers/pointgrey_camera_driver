@@ -43,15 +43,15 @@ LOGIN_DATA = {
 
 ARCHS = {
     'x86_64': (
-        'https://www.ptgrey.com/support/downloads/10322', (
-            'flycapture2-2.7.3.13-amd64/libflycapture-2.7.3.13_amd64.deb',
-            'flycapture2-2.7.3.13-amd64/libflycapture-2.7.3.13_amd64-dev.deb'),
-        'usr/lib/libflycapture.so.2.7.3.13'),
+        'https://www.ptgrey.com/support/downloads/10051', (
+            'flycapture2-2.6.3.4-amd64/libflycapture-2.6.3.4_amd64.deb',
+            'flycapture2-2.6.3.4-amd64/libflycapture-2.6.3.4_amd64-dev.deb'),
+        'usr/lib/libflycapture.so.2.6.3.4'),
     'i386': (
-        'https://www.ptgrey.com/support/downloads/10323', (
-            'flycapture2-2.7.3.13-i386/libflycapture-2.7.3.13_i386.deb',
-            'flycapture2-2.7.3.13-i386/libflycapture-2.7.3.13_i386-dev.deb'),
-        'usr/lib/libflycapture.so.2.7.3.13')
+        'https://www.ptgrey.com/support/downloads/10049', (
+            'flycapture2-2.6.3.4-i386/libflycapture-2.6.3.4_i386.deb',
+            'flycapture2-2.6.3.4-i386/libflycapture-2.6.3.4_i386-dev.deb'),
+        'usr/lib/libflycapture.so.2.6.3.4')
     }
 
 archive_url, debs, shared_library = ARCHS[sys.argv[1]]
