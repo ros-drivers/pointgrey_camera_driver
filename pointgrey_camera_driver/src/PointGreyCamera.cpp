@@ -288,6 +288,12 @@ bool PointGreyCamera::setFormat7(FlyCapture2::Mode &fmt7Mode, FlyCapture2::Pixel
   error = cam_.SetFormat7Configuration(&fmt7ImageSettings, fmt7PacketInfo.recommendedBytesPerPacket);
   PointGreyCamera::handleError("PointGreyCamera::setFormat7 Could not send Format7 configuration to the camera", error);
 
+  // Get camera info to check if camera is running in color or mono mode
+  CameraInfo cInfo;
+  error = cam_.GetCameraInfo(&cInfo);
+  PointGreyCamera::handleError("PointGreyCamera::setFormat7  Failed to get camera info.", error);
+  isColor_ = cInfo.isColorCamera;
+
   return retVal;
 }
 
@@ -877,6 +883,12 @@ void PointGreyCamera::connect()
     error = cam_.Connect(&guid);
     PointGreyCamera::handleError("PointGreyCamera::connect Failed to connect to camera", error);
 
+    // Get camera info to check if camera is running in color or mono mode
+    CameraInfo cInfo;
+    error = cam_.GetCameraInfo(&cInfo);
+    PointGreyCamera::handleError("PointGreyCamera::connect  Failed to get camera info.", error);
+    isColor_ = cInfo.isColorCamera;
+
     // Enable metadata
     EmbeddedImageInfo info;
     info.timestamp.onOff = true;
@@ -944,16 +956,13 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
     image.header.stamp.sec = embeddedTime.seconds;
     image.header.stamp.nsec = 1000 * embeddedTime.microSeconds;
 
-    // Get camera info to check if color or black and white chameleon and check the bits per pixel.
-    CameraInfo cInfo;
-    error = cam_.GetCameraInfo(&cInfo);
-    PointGreyCamera::handleError("PointGreyCamera::grabImage  Failed to get camera info.", error);
+    // Check the bits per pixel.
     uint8_t bitsPerPixel = rawImage.GetBitsPerPixel();
 
     // Set the image encoding
     std::string imageEncoding = sensor_msgs::image_encodings::MONO8;
     BayerTileFormat bayer_format = rawImage.GetBayerTileFormat();
-    if(cInfo.isColorCamera && bayer_format != NONE)
+    if(isColor_ && bayer_format != NONE)
     {
       if(bitsPerPixel == 16)
       {
@@ -1020,11 +1029,6 @@ void PointGreyCamera::grabStereoImage(sensor_msgs::Image &image, const std::stri
     image.header.stamp.sec = embeddedTime.seconds;
     image.header.stamp.nsec = 1000 * embeddedTime.microSeconds;
 
-    // Get camera info to check if color or black and white chameleon and check the bits per pixel.
-    CameraInfo cInfo;
-    error = cam_.GetCameraInfo(&cInfo);
-    PointGreyCamera::handleError("PointGreyCamera::grabStereoImage  Failed to get camera info.", error);
-
     // GetBitsPerPixel returns 16, but that seems to mean "2 8 bit pixels, 
     // one for each image". Therefore, we don't use it
     //uint8_t bitsPerPixel = rawImage.GetBitsPerPixel();
@@ -1033,7 +1037,7 @@ void PointGreyCamera::grabStereoImage(sensor_msgs::Image &image, const std::stri
     std::string imageEncoding = sensor_msgs::image_encodings::MONO8;
     BayerTileFormat bayer_format = rawImage.GetBayerTileFormat();
 
-    if(cInfo.isColorCamera && bayer_format != NONE)
+    if(isColor_ && bayer_format != NONE)
     {
         switch(bayer_format)
         {

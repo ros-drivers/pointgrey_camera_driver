@@ -175,6 +175,9 @@ private:
   boost::mutex mutex_; ///< A mutex to make sure that we don't try to grabImages while reconfiguring or vice versa.  Implemented with boost::mutex::scoped_lock.
   volatile bool captureRunning_; ///< A status boolean that checks if the camera has been started and is loading images into its buffer.ù
   
+  /// If true, camera is currently running in color mode, otherwise camera is running in mono mode
+  bool isColor_;
+
   // For GigE cameras:
   /// If true, GigE packet size is automatically determined, otherwise packet_size_ is used:
   bool auto_packet_size_;
