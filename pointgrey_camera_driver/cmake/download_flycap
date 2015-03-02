@@ -32,6 +32,10 @@ import sys
 import tarfile
 import urllib
 import urllib2
+import os
+from os.path import join
+from os import listdir
+from shutil import move
 
 logging.basicConfig(level=logging.INFO)
 
@@ -51,10 +55,18 @@ ARCHS = {
         'https://www.ptgrey.com/support/downloads/10049', (
             'flycapture2-2.6.3.4-i386/libflycapture-2.6.3.4_i386.deb',
             'flycapture2-2.6.3.4-i386/libflycapture-2.6.3.4_i386-dev.deb'),
-        'usr/lib/libflycapture.so.2.6.3.4')
+        'usr/lib/libflycapture.so.2.6.3.4'),
+   'armv7': (
+        'http://www.ptgrey.com/support/downloads/10047/', 
+            'flycapture.2.6.3.4_armhf',
+            'lib/libflycapture.so.2.6.3.4')
     }
 
-archive_url, debs, shared_library = ARCHS[sys.argv[1]]
+if (sys.argv[1] == 'armv7'):
+    archive_url, folder_name, shared_library = ARCHS[sys.argv[1]]
+else:
+    archive_url, debs, shared_library = ARCHS[sys.argv[1]]
+
 library_dest = sys.argv[2]
 
 logging.info("Logging into ptgrey.com.")
@@ -72,9 +84,27 @@ logging.info("Unpacking tarball.")
 with tarfile.open(mode="r:gz", fileobj=cStringIO.StringIO(resp.read())) as tar:
     tar.extractall()
 
-for deb in debs:
-    logging.info("Extracting: %s", deb)
-    subprocess.check_call(['dpkg', '--extract', deb, '.'])
+if (sys.argv[1] == 'armv7'):
+    logging.info("ARM detected. Should have untar'd successfully.")
+    logging.info("Copying ARM lib: %s to %s", shared_library, library_dest)
 
-logging.info("Copying shared library.")
-shutil.copyfile(shared_library, library_dest)
+    subprocess.call(['pwd'])    
+    subprocess.call(['ls','-l'])
+
+    #folder_name = 'flycapture.2.6.3.4_armhf'    
+
+    for filename in listdir(join(os.getcwd(), folder_name)):
+        move(join(os.getcwd(), folder_name, filename), join(os.getcwd(), filename))
+
+    #shutil.move('flycapture.2.6.3.4_armhf/', os.getcwd() )
+    #subprocess.check_call(['mv', 'flycapture.2.6.3.4_armhf/*','.'])	
+    subprocess.call(['ls','-l'])    
+
+    shutil.copyfile(shared_library, library_dest)
+else:
+    for deb in debs:
+        logging.info("Extracting: %s", deb)
+    	subprocess.check_call(['dpkg', '--extract', deb, '.'])
+
+    logging.info("Copying shared library.")
+    shutil.copyfile(shared_library, library_dest)
