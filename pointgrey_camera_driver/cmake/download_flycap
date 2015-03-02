@@ -33,9 +33,6 @@ import tarfile
 import urllib
 import urllib2
 import os
-from os.path import join
-from os import listdir
-from shutil import move
 
 logging.basicConfig(level=logging.INFO)
 
@@ -85,19 +82,25 @@ with tarfile.open(mode="r:gz", fileobj=cStringIO.StringIO(resp.read())) as tar:
     tar.extractall()
 
 if (sys.argv[1] == 'armv7'):
-    logging.info("ARM detected. Should have untar'd successfully.")
     logging.info("Copying ARM lib: %s to %s", shared_library, library_dest)
 
-    subprocess.call(['pwd'])    
-    subprocess.call(['ls','-l'])
+    for filename in os.listdir(os.path.join(os.getcwd(), folder_name)):
+        shutil.move(os.path.join(os.getcwd(), folder_name, filename), 
+                    os.path.join(os.getcwd(), filename))
+    os.rmdir(folder_name)
 
-    #folder_name = 'flycapture.2.6.3.4_armhf'    
+    include_path = os.path.join(os.getcwd(), "include")
+    include_files = os.listdir(include_path)
+    print os.listdir(include_path)
+    flycap_folder = "flycapture"
+    os.mkdir(os.path.join(include_path, flycap_folder))    
 
-    for filename in listdir(join(os.getcwd(), folder_name)):
-        move(join(os.getcwd(), folder_name, filename), join(os.getcwd(), filename))
+    subprocess.call(['ls','-l'])    
+    for files in include_files:
+	if files.endswith(".h"):
+            print files
+            shutil.move(os.path.join(include_path, files), os.path.join(include_path, flycap_folder))
 
-    #shutil.move('flycapture.2.6.3.4_armhf/', os.getcwd() )
-    #subprocess.check_call(['mv', 'flycapture.2.6.3.4_armhf/*','.'])	
     subprocess.call(['ls','-l'])    
 
     shutil.copyfile(shared_library, library_dest)
