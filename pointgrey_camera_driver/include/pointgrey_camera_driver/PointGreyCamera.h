@@ -129,7 +129,7 @@ public:
   * \param id serial number for the camera.  Should be something like 10491081.
   */
   void setDesiredCamera(const uint32_t &id);
-  
+
   /*!
   * \brief Set parameters relative to GigE cameras.
   *
@@ -151,7 +151,7 @@ public:
 
   void setGain(double &gain);
 
-  void setBRWhiteBalance(uint16_t &blue, uint16_t &red);
+  void setBRWhiteBalance(bool auto_white_balance, uint16_t &blue, uint16_t &red);
 
   uint getGain();
 
@@ -174,7 +174,7 @@ private:
 
   boost::mutex mutex_; ///< A mutex to make sure that we don't try to grabImages while reconfiguring or vice versa.  Implemented with boost::mutex::scoped_lock.
   volatile bool captureRunning_; ///< A status boolean that checks if the camera has been started and is loading images into its buffer.ù
-  
+
   // For GigE cameras:
   /// If true, GigE packet size is automatically determined, otherwise packet_size_ is used:
   bool auto_packet_size_;
@@ -257,7 +257,7 @@ private:
   *
   * \return Returns true when the configuration could be applied without modification.
   */
-  bool setWhiteBalance(uint16_t &blue, uint16_t &red);
+  bool setWhiteBalance(bool& auto_white_balance, uint16_t &blue, uint16_t &red);
 
   /*!
   * \brief Gets the current frame rate.
@@ -320,7 +320,7 @@ private:
   * \param packet_size The packet size value to use.
   */
   void setupGigEPacketSize(FlyCapture2::PGRGuid & guid, unsigned int packet_size);
-  
+
   /*!
   * \brief Will configure the packet delay of the GigECamera with the given GUID to a given value.
   *

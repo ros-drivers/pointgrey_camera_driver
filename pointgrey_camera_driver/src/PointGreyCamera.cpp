@@ -128,7 +128,7 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   // Set white balance
   uint16_t blue = config.white_balance_blue;
   uint16_t red = config.white_balance_red;
-  retVal &= PointGreyCamera::setWhiteBalance(blue, red);
+  retVal &= PointGreyCamera::setWhiteBalance(config.auto_white_balance, blue, red);
   config.white_balance_blue = blue;
   config.white_balance_red = red;
 
@@ -170,9 +170,9 @@ void PointGreyCamera::setGain(double &gain)
   PointGreyCamera::setProperty(GAIN, false, gain);
 }
 
-void PointGreyCamera::setBRWhiteBalance(uint16_t &blue, uint16_t &red)
+void PointGreyCamera::setBRWhiteBalance(bool auto_white_balance, uint16_t &blue, uint16_t &red)
 {
-  PointGreyCamera::setWhiteBalance(blue, red);
+  PointGreyCamera::setWhiteBalance(auto_white_balance, blue, red);
 }
 
 void PointGreyCamera::setVideoMode(FlyCapture2::VideoMode &videoMode)
@@ -525,7 +525,7 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
   return retVal;
 }
 
-bool PointGreyCamera::setWhiteBalance(uint16_t &blue, uint16_t &red)
+bool PointGreyCamera::setWhiteBalance(bool &auto_white_balance, uint16_t &blue, uint16_t &red)
 {
   bool retVal = true;
 
@@ -543,37 +543,21 @@ bool PointGreyCamera::setWhiteBalance(uint16_t &blue, uint16_t &red)
     error = cam_.GetPropertyInfo(&pInfo);
     PointGreyCamera::handleError("PointGreyCamera::setWhiteBalance Could not get property info.", error);
 
+    unsigned white_balance_addr = 0x80C;
+    unsigned enable = 1 << 31;  // the 32th bit have to be on to enable white balance
+    unsigned value = 1 << 25;  // the 26th bit turns on white balance
+    if (auto_white_balance) {
+      value |= 1 << 24;  // the 25th bit turns on auto white balance
+    } else {
+      value |= blue << 12 | red;
+    }
+
+    error = cam_.WriteRegister(white_balance_addr, enable);
+    error = cam_.WriteRegister(white_balance_addr, value);
+    handleError("PointGreyCamera::setWhiteBalance  Failed to set white balance", error);
+
     Property prop;
     prop.type = WHITE_BALANCE;
-    prop.autoManualMode = (false || !pInfo.manualSupported);
-    prop.absControl = false;
-    prop.onOff = pInfo.onOffSupported;
-
-    if(blue < pInfo.min)
-    {
-      blue = pInfo.min;
-      retVal &= false;
-    }
-    else if(blue > pInfo.max)
-    {
-      blue = pInfo.max;
-      retVal &= false;
-    }
-    if(red < pInfo.min)
-    {
-      red = pInfo.min;
-      retVal &= false;
-    }
-    else if(red > pInfo.max)
-    {
-      red = pInfo.max;
-      retVal &= false;
-    }
-    prop.valueA = red; // I don't know why red comes first for them, maybe RGB?
-    prop.valueB = blue;
-    error = cam_.SetProperty(&prop);
-    PointGreyCamera::handleError("PointGreyCamera::setWhiteBalance  Failed to set value.", error);
-
     // Read back setting to confirm
     error = cam_.GetProperty(&prop);
     PointGreyCamera::handleError("PointGreyCamera::setWhiteBalance  Failed to confirm value.", error);
@@ -588,6 +572,7 @@ bool PointGreyCamera::setWhiteBalance(uint16_t &blue, uint16_t &red)
     retVal &= false;
     blue = 0;
     red = 0;
+    auto_white_balance = false;
   }
 
   return retVal;
