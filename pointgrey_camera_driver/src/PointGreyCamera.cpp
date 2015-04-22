@@ -128,7 +128,7 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   // Set white balance
   uint16_t blue = config.white_balance_blue;
   uint16_t red = config.white_balance_red;
-  retVal &= PointGreyCamera::setWhiteBalance(blue, red);
+  retVal &= PointGreyCamera::setWhiteBalance(config.auto_white_balance, blue, red);
   config.white_balance_blue = blue;
   config.white_balance_red = red;
 
@@ -170,9 +170,9 @@ void PointGreyCamera::setGain(double &gain)
   PointGreyCamera::setProperty(GAIN, false, gain);
 }
 
-void PointGreyCamera::setBRWhiteBalance(uint16_t &blue, uint16_t &red)
+void PointGreyCamera::setBRWhiteBalance(bool auto_white_balance, uint16_t &blue, uint16_t &red)
 {
-  PointGreyCamera::setWhiteBalance(blue, red);
+  PointGreyCamera::setWhiteBalance(auto_white_balance, blue, red);
 }
 
 void PointGreyCamera::setVideoMode(FlyCapture2::VideoMode &videoMode)
@@ -525,72 +525,50 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
   return retVal;
 }
 
-bool PointGreyCamera::setWhiteBalance(uint16_t &blue, uint16_t &red)
+bool PointGreyCamera::setWhiteBalance(bool &auto_white_balance, uint16_t &blue, uint16_t &red)
 {
-  bool retVal = true;
-
   // Get camera info to check if color or black and white chameleon
   CameraInfo cInfo;
   Error error = cam_.GetCameraInfo(&cInfo);
-  PointGreyCamera::handleError("PointGreyCamera::setWhiteBalance  Failed to get camera info.", error);
+  handleError("PointGreyCamera::setWhiteBalance  Failed to get camera info.", error);
 
-  // Set the image encoding
-  if(cInfo.isColorCamera && blue > 0 && red > 0)  ///< @todo 11/15 hack to ignore white balance changes.
+  if(!cInfo.isColorCamera)
   {
-    // return true if we can set values as desired.
-    PropertyInfo pInfo;
-    pInfo.type = WHITE_BALANCE;
-    error = cam_.GetPropertyInfo(&pInfo);
-    PointGreyCamera::handleError("PointGreyCamera::setWhiteBalance Could not get property info.", error);
-
-    Property prop;
-    prop.type = WHITE_BALANCE;
-    prop.autoManualMode = (false || !pInfo.manualSupported);
-    prop.absControl = false;
-    prop.onOff = pInfo.onOffSupported;
-
-    if(blue < pInfo.min)
-    {
-      blue = pInfo.min;
-      retVal &= false;
-    }
-    else if(blue > pInfo.max)
-    {
-      blue = pInfo.max;
-      retVal &= false;
-    }
-    if(red < pInfo.min)
-    {
-      red = pInfo.min;
-      retVal &= false;
-    }
-    else if(red > pInfo.max)
-    {
-      red = pInfo.max;
-      retVal &= false;
-    }
-    prop.valueA = red; // I don't know why red comes first for them, maybe RGB?
-    prop.valueB = blue;
-    error = cam_.SetProperty(&prop);
-    PointGreyCamera::handleError("PointGreyCamera::setWhiteBalance  Failed to set value.", error);
-
-    // Read back setting to confirm
-    error = cam_.GetProperty(&prop);
-    PointGreyCamera::handleError("PointGreyCamera::setWhiteBalance  Failed to confirm value.", error);
-    if(!prop.autoManualMode)
-    {
-      red = prop.valueA;
-      blue = prop.valueB;
-    }
-  }
-  else if(blue != 0 || red != 0)    // Is a black and white camera and there are white balance settings.
-  {
-    retVal &= false;
-    blue = 0;
+    // Not a color camera, does not support auto white balance
+    auto_white_balance = false;
     red = 0;
+    blue = 0;
+    return false;
   }
 
-  return retVal;
+  unsigned white_balance_addr = 0x80c;
+  unsigned enable = 1 << 31;
+  unsigned value = 1 << 25;
+
+  if (auto_white_balance) {
+    PropertyInfo prop_info;
+    prop_info.type = WHITE_BALANCE;
+    error = cam_.GetPropertyInfo(&prop_info);
+    handleError("PointGreyCamera::setWhiteBalance  Failed to get property info.", error);
+    if (!prop_info.autoSupported) {
+      // This is typically because a color camera is in mono mode, so we set
+      // the red and blue to some reasonable value for later use
+      auto_white_balance = false;
+      blue = 800;
+      red = 550;
+      return false;
+    }
+    // Auto white balance is supported
+    error = cam_.WriteRegister(white_balance_addr, enable);
+    handleError("PointGreyCamera::setWhiteBalance  Failed to write to register.", error);
+    value |= 1 << 24;
+  } else {
+    // Manual mode
+    value |= blue << 12 | red;
+  }
+  error = cam_.WriteRegister(white_balance_addr, value);
+  handleError("PointGreyCamera::setWhiteBalance  Failed to write to register.", error);
+  return true;
 }
 
 void PointGreyCamera::setTimeout(const double &timeout)
