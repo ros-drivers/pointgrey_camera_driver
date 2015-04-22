@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.12.0 (2015-04-22)
+-------------------
 * Remove dependency on driver_base.
   Define SensorLevels constants directly in the relevant places, rather
   than using the external message for this.
