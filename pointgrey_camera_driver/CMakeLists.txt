@@ -4,7 +4,7 @@ project(pointgrey_camera_driver)
 find_package(catkin REQUIRED COMPONENTS
   roscpp roslint nodelet sensor_msgs wfov_camera_msgs
   image_exposure_msgs camera_info_manager image_transport
-  dynamic_reconfigure driver_base diagnostic_updater)
+  dynamic_reconfigure diagnostic_updater)
 
 generate_dynamic_reconfigure_options(
   cfg/PointGrey.cfg

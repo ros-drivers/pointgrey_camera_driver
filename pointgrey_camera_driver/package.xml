@@ -22,7 +22,6 @@
   <build_depend>camera_info_manager</build_depend>
   <build_depend>image_transport</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>driver_base</build_depend>
   <build_depend>diagnostic_updater</build_depend>
   <build_depend>dpkg</build_depend>
   <run_depend>roscpp</run_depend>
@@ -34,7 +33,6 @@
   <run_depend>camera_info_manager</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>driver_base</run_depend>
   <run_depend>diagnostic_updater</run_depend>
  
   <!-- Dependencies of libflycapture -->
