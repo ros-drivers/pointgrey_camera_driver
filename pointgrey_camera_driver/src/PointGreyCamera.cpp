@@ -52,19 +52,22 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   if(!cam_.IsConnected())
   {
     PointGreyCamera::connect();
-    //throw std::runtime_error("PointGreyCamera::setNewConfiguration Camera not connected. Reconfigure has not taken effect!");
   }
 
-  boost::mutex::scoped_lock scopedLock(mutex_); // Activate mutex to prevent us from grabbing images during this time
+  // Activate mutex to prevent us from grabbing images during this time
+  boost::mutex::scoped_lock scopedLock(mutex_);
+
   // return true if we can set values as desired.
   bool retVal = true;
+
   // Check video mode
   VideoMode vMode; // video mode desired
   Mode fmt7Mode; // fmt7Mode to set
   retVal &= PointGreyCamera::getVideoModeFromString(config.video_mode, vMode, fmt7Mode);
 
-  // Only change video mode if we have to (Reconfigure will report anything other than RECONFIGURE_RUNNING if we need to change videomode)
-  if(level != driver_base::SensorLevels::RECONFIGURE_RUNNING)
+  // Only change video mode if we have to.
+  // dynamic_reconfigure will report anything other than LEVEL_RECONFIGURE_RUNNING if we need to change videomode.
+  if(level != PointGreyCamera::LEVEL_RECONFIGURE_RUNNING)
   {
     bool wasRunning = PointGreyCamera::stop(); // Check if camera is running, and if it is, stop it.
     if(vMode == VIDEOMODE_FORMAT7)
@@ -418,7 +421,7 @@ bool PointGreyCamera::getFormat7PixelFormatFromString(std::string &sformat, FlyC
       fmt7PixFmt = PIXEL_FORMAT_MONO8;
       retVal &= false;
     }
-  }  
+  }
 
   return retVal;
 }
@@ -850,12 +853,12 @@ void PointGreyCamera::connect()
     {
 		// Set packet size:
         if (auto_packet_size_)
-            setupGigEPacketSize(guid);   
+            setupGigEPacketSize(guid);
         else
-            setupGigEPacketSize(guid, packet_size_);             
-            
-        // Set packet delay:    
-        setupGigEPacketDelay(guid, packet_delay_);    
+            setupGigEPacketSize(guid, packet_size_);
+
+        // Set packet delay:
+        setupGigEPacketDelay(guid, packet_delay_);
     }
 
     error = cam_.Connect(&guid);
@@ -1007,7 +1010,7 @@ void PointGreyCamera::grabStereoImage(sensor_msgs::Image &image, const std::stri
     image.header.stamp.sec = embeddedTime.seconds;
     image.header.stamp.nsec = 1000 * embeddedTime.microSeconds;
 
-    // GetBitsPerPixel returns 16, but that seems to mean "2 8 bit pixels, 
+    // GetBitsPerPixel returns 16, but that seems to mean "2 8 bit pixels,
     // one for each image". Therefore, we don't use it
     //uint8_t bitsPerPixel = rawImage.GetBitsPerPixel();
 
