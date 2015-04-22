@@ -1151,7 +1151,7 @@ std::vector<uint32_t> PointGreyCamera::getAttachedCameras()
   return cameras;
 }
 
-void PointGreyCamera::handleError(const std::string &prefix, FlyCapture2::Error &error) const
+void PointGreyCamera::handleError(const std::string &prefix, const FlyCapture2::Error &error)
 {
   if(error == PGRERROR_TIMEOUT)
   {

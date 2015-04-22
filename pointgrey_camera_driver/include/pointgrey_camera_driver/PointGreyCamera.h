@@ -332,6 +332,7 @@ private:
   */
   void setupGigEPacketDelay(FlyCapture2::PGRGuid & guid, unsigned int packet_delay);
 
+public:
   /*!
   * \brief Handles errors returned by FlyCapture2.
   *
@@ -339,7 +340,7 @@ private:
   * \param prefix Message that will prefix the obscure FlyCapture2 error and provide context on the problem.
   * \param error FlyCapture2::Error that is returned from many FlyCapture functions.
   */
-  void handleError(const std::string &prefix, FlyCapture2::Error &error) const;
+  static void handleError(const std::string &prefix, const FlyCapture2::Error &error);
 
 };
 
