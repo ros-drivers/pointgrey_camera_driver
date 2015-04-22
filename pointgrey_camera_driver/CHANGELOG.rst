@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.12.0 (2015-04-22)
+-------------------
 * Improve list_cameras by outputing more information about it
   The previous list_cameras only output 1 serial number which is
   not very informative. The improved one will print serial, model,
