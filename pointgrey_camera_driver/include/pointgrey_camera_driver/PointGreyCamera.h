@@ -175,6 +175,9 @@ private:
   boost::mutex mutex_; ///< A mutex to make sure that we don't try to grabImages while reconfiguring or vice versa.  Implemented with boost::mutex::scoped_lock.
   volatile bool captureRunning_; ///< A status boolean that checks if the camera has been started and is loading images into its buffer.ù
 
+  /// If true, camera is currently running in color mode, otherwise camera is running in mono mode
+  bool isColor_;
+
   // For GigE cameras:
   /// If true, GigE packet size is automatically determined, otherwise packet_size_ is used:
   bool auto_packet_size_;
@@ -332,6 +335,7 @@ private:
   */
   void setupGigEPacketDelay(FlyCapture2::PGRGuid & guid, unsigned int packet_delay);
 
+public:
   /*!
   * \brief Handles errors returned by FlyCapture2.
   *
@@ -339,7 +343,7 @@ private:
   * \param prefix Message that will prefix the obscure FlyCapture2 error and provide context on the problem.
   * \param error FlyCapture2::Error that is returned from many FlyCapture functions.
   */
-  void handleError(const std::string &prefix, FlyCapture2::Error &error) const;
+  static void handleError(const std::string &prefix, const FlyCapture2::Error &error);
 
 };
 
