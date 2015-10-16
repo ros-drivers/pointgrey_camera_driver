@@ -13,6 +13,7 @@
       <param name="frame_rate" value="15" />
       <param name="first_namespace" value="left" />
       <param name="second_namespace" value="right" />
+      <param name="format7_color_coding" value="raw16" />
       <param name="serial" value="$(arg bumblebee_serial)" />
       
       <!-- Use the camera_calibration package to create these files -->
