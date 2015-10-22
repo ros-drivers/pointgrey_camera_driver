@@ -1,0 +1,22 @@
+<launch>
+
+  <!-- Gazebo -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="worlds/mud.world"/>
+    <arg name="gui" value="true" />
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="headless" value="false"/>
+  </include>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" />
+
+  <!-- Load URDF -->
+  <param name="robot_description"
+    command="$(find xacro)/xacro.py '$(find pointgrey_camera_description)/urdf/test_flea3.urdf.xacro'" />
+
+  <!-- Spawn the robot in Gazebo -->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+	      args="-urdf -model flea3 -param robot_description" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find pointgrey_camera_description)/rviz/view_flea3.rviz" />
+</launch>
