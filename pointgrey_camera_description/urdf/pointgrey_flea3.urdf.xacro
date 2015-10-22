@@ -4,8 +4,8 @@
   <!-- camera_{x,y,z,mass} are they physical properties of the camera since
        flea3's can have different physical footprints.  -->
   <xacro:macro name="pointgrey_flea3"
-    params="frame:=camera name:=camera camera_x camera_y camera_z camera_mass
-             hfov fps width height format:=R8G8B8 near:=0.5 far:=300">
+    params="frame:=camera name:=camera camera_x:=0.0754 camera_y:=0.029 camera_z:=0.035 camera_mass:=0.085
+             hfov:=1.0471975512 fps:=120 width:=1272 height:=1016 format:=R8G8B8 near:=0.5 far:=300">
 
     <link name="${frame}">
       <inertial>
