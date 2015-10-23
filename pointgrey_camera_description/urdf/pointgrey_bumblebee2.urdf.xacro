@@ -108,7 +108,7 @@
         name="${name}"
         hfov="${hfov}"
         baseline="0.120"
-        fps="24"
+        fps="20"
         width="1024"
         height="768"
         format="${format}"
