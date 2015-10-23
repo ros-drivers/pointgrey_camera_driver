@@ -72,9 +72,9 @@
         </geometry>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="-1.5707 0 -1.5707"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://pointgrey_camera_description/meshes/pointgrey_bumblebee2.dae"/>
+          <box size="0.04740 0.157 0.036"/>
         </geometry>
       </collision>
       <inertial>
