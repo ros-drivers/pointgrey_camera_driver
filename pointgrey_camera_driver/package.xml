@@ -23,7 +23,8 @@
   <build_depend>image_transport</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>diagnostic_updater</build_depend>
-  <build_depend>dpkg</build_depend>
+  <build_depend>curl</build_depend>  <!-- to get ca-certificates for downloading flycapture -->
+  <build_depend>dpkg</build_depend>  <!-- for unpacking flycapture debs -->
   <run_depend>roscpp</run_depend>
   <run_depend>nodelet</run_depend>
   <run_depend>sensor_msgs</run_depend>
