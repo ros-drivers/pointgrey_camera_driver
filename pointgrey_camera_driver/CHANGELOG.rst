@@ -2,6 +2,15 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Depend on curl to pull in ca-certificates.
+* Specify color coding. Without the format7 color coding specified, the driver will crash.
+* Adds the vendor ID for Startech-brand Firewire interface cards.  This is necessary for accessing the camera(s) connected through the card.
+* Removing check for number of subscribers to publish raw image.
+* Support cameras with high framerate.
+* Contributors: Jeff Schmidt, Konrad Banachowicz, Mike Purvis
+
 0.12.0 (2015-04-22)
 -------------------
 * Remove dependency on driver_base.
