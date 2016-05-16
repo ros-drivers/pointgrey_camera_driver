@@ -11,10 +11,10 @@
 
   <group ns="$(arg camera_name)" >
     <group ns="left" >
-      <node pkg="nodelet" type="nodelet" name="left_camera_nodelet_manager" args="manager" />
+      <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" />
 
-      <node pkg="nodelet" type="nodelet" name="left_camera_nodelet"
-            args="load pointgrey_camera_driver/PointGreyCameraNodelet left_camera_nodelet_manager" >
+      <node pkg="nodelet" type="nodelet" name="camera_nodelet"
+            args="load pointgrey_camera_driver/PointGreyCameraNodelet camera_nodelet_manager" >
         <param name="frame_id" value="camera_left" />
         <param name="serial" value="$(arg left_camera_serial)" />
 
@@ -28,16 +28,16 @@
                value="file://$(env HOME)/.ros/camera_info/$(arg left_camera_serial).yaml" />
       </node>
 
-      <node pkg="nodelet" type="nodelet" name="left_image_proc_debayer"
-          args="load image_proc/debayer left_camera_nodelet_manager">
+      <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
+          args="load image_proc/debayer camera_nodelet_manager">
       </node>
     </group>
 
     <group ns="right" >
-      <node pkg="nodelet" type="nodelet" name="right_camera_nodelet_manager" args="manager" />
+      <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" />
 
-      <node pkg="nodelet" type="nodelet" name="right_camera_nodelet"
-            args="load pointgrey_camera_driver/PointGreyCameraNodelet right_camera_nodelet_manager" >
+      <node pkg="nodelet" type="nodelet" name="camera_nodelet"
+            args="load pointgrey_camera_driver/PointGreyCameraNodelet camera_nodelet_manager" >
         <param name="frame_id" value="camera_right" />
         <param name="serial" value="$(arg right_camera_serial)" />
 
@@ -51,11 +51,15 @@
                value="file://$(env HOME)/.ros/camera_info/$(arg right_camera_serial).yaml" />
       </node>
 
-      <node pkg="nodelet" type="nodelet" name="right_image_proc_debayer"
-          args="load image_proc/debayer right_camera_nodelet_manager">
+      <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
+          args="load image_proc/debayer camera_nodelet_manager">
       </node>
 
     </group>
+
+    <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc">
+      <param name="approximate_sync" value="true"/>
+    </node>
 
   </group>
 </launch>
