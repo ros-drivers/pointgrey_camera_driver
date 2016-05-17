@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(pointgrey_camera_driver)
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp roslint nodelet sensor_msgs wfov_camera_msgs
+  roscpp nodelet sensor_msgs wfov_camera_msgs
   image_exposure_msgs camera_info_manager image_transport
   dynamic_reconfigure diagnostic_updater)
 
@@ -17,23 +17,23 @@ catkin_package(
 # If the user has manually installed flycapture, use the system path version. If not,
 # download it. We can't resolve this dependency using the usual rosdep means because
 # the Point Grey EULA prohibits redistributing the headers or the packages which
-# contains them. Fortunately, we can download the archive directly from their 
+# contains them. Fortunately, we can download the archive directly from their
 # website during this build process.
 find_library(POINTGREY_LIB flycapture)
 if(NOT POINTGREY_LIB)
   message(STATUS "libflycapture not found in system library path")
   include(cmake/DownloadFlyCap.cmake)
-  download_flycap(POINTGREY_LIB POINTGREY_INCLUDE_DIR) 
+  download_flycap(POINTGREY_LIB POINTGREY_INCLUDE_DIR)
   message(STATUS "libflycapture library: ${POINTGREY_LIB}")
   message(STATUS "libflycapture include: ${POINTGREY_INCLUDE_DIR}")
-  include_directories(${POINTGREY_INCLUDE_DIR})  
+  include_directories(${POINTGREY_INCLUDE_DIR})
 endif()
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_library(PointGreyCamera src/PointGreyCamera.cpp)
 target_link_libraries(PointGreyCamera ${POINTGREY_LIB} ${catkin_LIBRARIES})
-add_dependencies(PointGreyCamera ${PROJECT_NAME}_gencfg) 
+add_dependencies(PointGreyCamera ${PROJECT_NAME}_gencfg)
 
 add_library(PointGreyCameraNodelet src/nodelet.cpp)
 target_link_libraries(PointGreyCameraNodelet PointGreyCamera ${catkin_LIBRARIES})
@@ -55,14 +55,14 @@ add_executable(pointgrey_list_cameras src/list_cameras.cpp)
 target_link_libraries(pointgrey_list_cameras PointGreyCamera ${catkin_LIBRARIES})
 set_target_properties(pointgrey_list_cameras
                       PROPERTIES OUTPUT_NAME list_cameras PREFIX "")
- 
-install(TARGETS 
+
+install(TARGETS
   PointGreyCamera
   PointGreyCameraNodelet
   PointGreyStereoCameraNodelet
   pointgrey_camera_node
   pointgrey_stereo_node
-  pointgrey_list_cameras 
+  pointgrey_list_cameras
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -76,4 +76,12 @@ install(FILES nodelet_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION
 
 install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-roslint_cpp()
+if (CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
+  roslaunch_add_file_check(launch/bumblebee.launch)
+  roslaunch_add_file_check(launch/camera.launch)
+  roslaunch_add_file_check(launch/stereo.launch)
+
+  find_package(roslint REQUIRED)
+  roslint_cpp()
+endif()
