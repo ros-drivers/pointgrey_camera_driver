@@ -9,7 +9,7 @@ before_install:
   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
   - sudo apt-get update -qq
 install:
-  - rosdep install --from-paths .. --ignore-src --rosdistro indigo
+  - rosdep install --from-paths .. --ignore-src --rosdistro indigo --default-yes
   - source /opt/ros/indigo/setup.bash
   - mkdir -p ~/catkin_ws/src && pushd ~/catkin_ws
   - catkin_init_workspace src
