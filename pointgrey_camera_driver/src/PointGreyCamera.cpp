@@ -380,47 +380,42 @@ bool PointGreyCamera::getFormat7PixelFormatFromString(std::string &sformat, FlyC
   Error error = cam_.GetCameraInfo(&cInfo);
   PointGreyCamera::handleError("PointGreyCamera::getFormat7PixelFormatFromString  Failed to get camera info.", error);
 
+  std::string defaultFmt;
+  FlyCapture2::PixelFormat fmt7DefaultPixFmt;
+
+  // Find the default formats for color and black and white cameras
   if(cInfo.isColorCamera)
   {
-    if(sformat.compare("raw8") == 0)
-    {
-      fmt7PixFmt = PIXEL_FORMAT_RAW8;
-    }
-    else if(sformat.compare("raw16") == 0)
-    {
-      fmt7PixFmt = PIXEL_FORMAT_RAW16;
-    }
-    else if(sformat.compare("mono8") == 0)
-    {
-      fmt7PixFmt = PIXEL_FORMAT_MONO8;
-    }
-    else if(sformat.compare("mono16") == 0)
-    {
-      fmt7PixFmt = PIXEL_FORMAT_MONO16;
-    }
-    else
-    {
-      sformat = "raw8";
-      fmt7PixFmt = PIXEL_FORMAT_RAW8;
-      retVal &= false;
-    }
+    defaultFmt = "raw8";
+    fmt7DefaultPixFmt = PIXEL_FORMAT_RAW8;
   }
-  else     // Is black and white
+  else
   {
-    if(sformat.compare("mono8") == 0)
-    {
-      fmt7PixFmt = PIXEL_FORMAT_MONO8;
-    }
-    else if(sformat.compare("mono16") == 0)
-    {
-      fmt7PixFmt = PIXEL_FORMAT_MONO16;
-    }
-    else
-    {
-      sformat = "mono8";
-      fmt7PixFmt = PIXEL_FORMAT_MONO8;
-      retVal &= false;
-    }
+    defaultFmt = "mono8";
+    fmt7DefaultPixFmt = PIXEL_FORMAT_MONO8;
+  }
+
+  if(sformat.compare("raw8") == 0)
+  {
+    fmt7PixFmt = PIXEL_FORMAT_RAW8;
+  }
+  else if(sformat.compare("raw16") == 0)
+  {
+    fmt7PixFmt = PIXEL_FORMAT_RAW16;
+  }
+  else if(sformat.compare("mono8") == 0)
+  {
+    fmt7PixFmt = PIXEL_FORMAT_MONO8;
+  }
+  else if(sformat.compare("mono16") == 0)
+  {
+    fmt7PixFmt = PIXEL_FORMAT_MONO16;
+  }
+  else
+  {
+    sformat = defaultFmt;
+    fmt7PixFmt = fmt7DefaultPixFmt;
+    retVal &= false;
   }
 
   return retVal;
