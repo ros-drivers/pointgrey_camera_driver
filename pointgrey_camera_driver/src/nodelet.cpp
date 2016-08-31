@@ -240,7 +240,7 @@ private:
   */
   void onInit()
   {
-	// Get nodeHandles
+    // Get nodeHandles
     ros::NodeHandle &nh = getMTNodeHandle();
     ros::NodeHandle &pnh = getMTPrivateNodeHandle();
 
