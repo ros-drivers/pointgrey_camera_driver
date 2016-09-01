@@ -1148,6 +1148,6 @@ void PointGreyCamera::handleError(const std::string &prefix, const FlyCapture2::
     std::stringstream out;
     out << error.GetType();
     std::string desc(error.GetDescription());
-    throw std::runtime_error(prefix + start + out.str() + desc);
+    throw std::runtime_error(prefix + start + out.str() + " " + desc);
   }
 }
