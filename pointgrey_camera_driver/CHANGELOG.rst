@@ -2,6 +2,12 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Reconnect on error (`#79 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/79>`_)
+* Update to FlyCapture v2.9.3.43 (`#65 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/65>`_)
+* Contributors: Anass Al, Enrique Fernández Perdomo, Konrad Banachowicz
+
 0.12.1 (2015-11-06)
 -------------------
 * Depend on curl to pull in ca-certificates.
