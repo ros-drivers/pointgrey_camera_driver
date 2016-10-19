@@ -208,8 +208,27 @@ private:
     ros::NodeHandle &pnh = getMTPrivateNodeHandle();
 
     // Get a serial number through ros
-    int serial;
-    pnh.param<int>("serial", serial, 0);
+    int serial = 0;
+
+    XmlRpc::XmlRpcValue serial_xmlrpc;
+    pnh.getParam("serial", serial_xmlrpc);
+    if (serial_xmlrpc.getType() == XmlRpc::XmlRpcValue::TypeInt)
+    {
+      pnh.param<int>("serial", serial, 0);
+    }
+    else if (serial_xmlrpc.getType() == XmlRpc::XmlRpcValue::TypeString)
+    {
+      std::string serial_str;
+      pnh.param<std::string>("serial", serial_str, "0");
+      std::istringstream(serial_str) >> serial;
+    }
+    else
+    {
+      NODELET_DEBUG("Serial XMLRPC type.");
+      serial = 0;
+    }
+    NODELET_INFO("Using camera serial %d", serial);
+
     pg_.setDesiredCamera((uint32_t)serial);
 
     // Get GigE camera parameters:
