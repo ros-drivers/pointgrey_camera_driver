@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>pointgrey_camera_driver</name>
-  <version>0.9.2</version>
+  <version>0.12.2</version>
   <description>Point Grey camera driver based on libflycapture2.</description>
 
   <maintainer email="mpurvis@clearpathrobotics.com">Mike Purvis</maintainer>
@@ -22,18 +22,18 @@
   <build_depend>camera_info_manager</build_depend>
   <build_depend>image_transport</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>driver_base</build_depend>
   <build_depend>diagnostic_updater</build_depend>
-  <build_depend>dpkg</build_depend>
+  <build_depend>curl</build_depend>  <!-- to get ca-certificates for downloading flycapture -->
+  <build_depend>dpkg</build_depend>  <!-- for unpacking flycapture debs -->
   <run_depend>roscpp</run_depend>
   <run_depend>nodelet</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>wfov_camera_msgs</run_depend>
   <run_depend>image_exposure_msgs</run_depend>
+  <run_depend>image_proc</run_depend>
   <run_depend>camera_info_manager</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>driver_base</run_depend>
   <run_depend>diagnostic_updater</run_depend>
  
   <!-- Dependencies of libflycapture -->

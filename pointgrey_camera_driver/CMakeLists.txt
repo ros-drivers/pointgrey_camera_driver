@@ -4,7 +4,7 @@ project(pointgrey_camera_driver)
 find_package(catkin REQUIRED COMPONENTS
   roscpp roslint nodelet sensor_msgs wfov_camera_msgs
   image_exposure_msgs camera_info_manager image_transport
-  dynamic_reconfigure driver_base diagnostic_updater)
+  dynamic_reconfigure diagnostic_updater)
 
 generate_dynamic_reconfigure_options(
   cfg/PointGrey.cfg
@@ -75,8 +75,5 @@ install(FILES ${POINTGREY_LIB} DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 install(FILES nodelet_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION} )
 
 install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
-# This install will fail when not root.
-install(FILES udev/71-pgr.rules DESTINATION /etc/udev/rules.d)
 
 roslint_cpp()

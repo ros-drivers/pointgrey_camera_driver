@@ -2,6 +2,79 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.12.2 (2016-09-30)
+-------------------
+* Reconnect on error (`#79 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/79>`_)
+* Update to FlyCapture v2.9.3.43 (`#65 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/65>`_)
+* Contributors: Anass Al, Enrique Fernández Perdomo, Konrad Banachowicz
+
+0.12.1 (2015-11-06)
+-------------------
+* Depend on curl to pull in ca-certificates.
+* Specify color coding. Without the format7 color coding specified, the driver will crash.
+* Adds the vendor ID for Startech-brand Firewire interface cards.  This is necessary for accessing the camera(s) connected through the card.
+* Removing check for number of subscribers to publish raw image.
+* Support cameras with high framerate.
+* Contributors: Jeff Schmidt, Konrad Banachowicz, Mike Purvis
+
+0.12.0 (2015-04-22)
+-------------------
+* Remove dependency on driver_base.
+  Define SensorLevels constants directly in the relevant places, rather
+  than using the external message for this.
+* Improve list_cameras by outputing more information about it
+  The previous list_cameras only output 1 serial number which is
+  not very informative. The improved one will print serial, model,
+  vendor, sensor, resolution, color and firmware version.
+* Add auto white balance and fix not able to write white balance
+  Fix the problem of not being able to set white balance using Property.
+  When trying to set white balance on my FL3-U3-13E4C-C, both this ros
+  driver and flycap software cannot set the white balance naturally.
+  After playing around with the flycap software, I found that I have
+  to set the highest bit of register 80C (which is white balance) to 1
+  to enable this feature. So I modified the original SetWhiteBalance to
+  use WriteRegister directly. And add support for auto white balance.
+* Framerate improvements.
+* Support downloading the SDK for ARM.
+* Downgrade flycaptyre SDK to 2.6.3.4, see:
+  https://github.com/ros-drivers/pointgrey_camera_driver/issues/28
+* Contributors: Chao Qu, Julius Gelšvartas, Konrad Banachowicz, L0g1x, Mike Purvis
+
+0.11.0 (2014-11-07)
+-------------------
+* Change approach to downloading flycapture SDK.
+  The logic which fetches and extracts the archive from ptgrey.com
+  has been moved to a more reasonable and comprehensible python script.
+  This should better pave the way for better future ARM support in this
+  driver.
+* Use dh_installudev for udev rules.
+* The raw and mono pixel formats (raw8, raw16, mono8, mono16) can be selected from dynamic reconfigure with every video mode (while before it was hard coded that only mono pixel formats could be used with mode1 and mode2).
+* Binning information removed from camera_info published by the nodelet.
+* Add image_proc as dependency.
+* Removed changes to binning_x and binning_y in camera info messages (otherwise image_proc node would performs a further downsampling).
+* Now the wrapper allows to set raw and mono pixel formats with any mode.
+* Added possibility to set GigE packet delay as launch/conf parameter.
+* Changed 'auto_packet_size' to 'true' as default.
+* Added possibility to change GigE packet size for GigE cameras.
+* For GigE cameras, automatically discover best packet size.
+* Fix launch file syntax error (XML comments neither nest nor continue).
+* Contributors: Aaron Denney, Jeff Schmidt, Matteo Munaro, Mike Purvis
+
+0.10.0 (2014-08-18)
+-------------------
+* Added frame rate parameter to launchfiles.
+* Fixing lack of dynamic Bayer format detection/incorrect fixed Bayer format detection in the stereo driver, tested on BB2 hardware
+* Should prevent multiple camera nodes from conflicting.
+* Read camera's resulting trigger configuration.
+* Read camera's resulting strobe configuration.
+* Refactor GPIO pin comparison into separate function.
+* Support outputting strobes.
+* Enable altering trigger polarities.
+* Don't overwrite currently unused fields.
+* Modify firewire rule per issue `#6 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/6>`_
+* Make sure camera properties are supported before enabling them
+* Contributors: Aaron Denney, Jake Bruce, Jeff Schmidt, Mike Purvis, Ryan Gariepy
+
 0.9.2 (2014-07-13)
 ------------------
 * Added dpkg to build_depend

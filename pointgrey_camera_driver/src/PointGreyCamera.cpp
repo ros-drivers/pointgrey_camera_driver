@@ -52,25 +52,28 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   if(!cam_.IsConnected())
   {
     PointGreyCamera::connect();
-    //throw std::runtime_error("PointGreyCamera::setNewConfiguration Camera not connected. Reconfigure has not taken effect!");
   }
 
-  boost::mutex::scoped_lock scopedLock(mutex_); // Activate mutex to prevent us from grabbing images during this time
+  // Activate mutex to prevent us from grabbing images during this time
+  boost::mutex::scoped_lock scopedLock(mutex_);
+
   // return true if we can set values as desired.
   bool retVal = true;
+
   // Check video mode
   VideoMode vMode; // video mode desired
   Mode fmt7Mode; // fmt7Mode to set
   retVal &= PointGreyCamera::getVideoModeFromString(config.video_mode, vMode, fmt7Mode);
 
-  // Only change video mode if we have to (Reconfigure will report anything other than RECONFIGURE_RUNNING if we need to change videomode)
-  if(level != driver_base::SensorLevels::RECONFIGURE_RUNNING)
+  // Only change video mode if we have to.
+  // dynamic_reconfigure will report anything other than LEVEL_RECONFIGURE_RUNNING if we need to change videomode.
+  if(level != PointGreyCamera::LEVEL_RECONFIGURE_RUNNING)
   {
     bool wasRunning = PointGreyCamera::stop(); // Check if camera is running, and if it is, stop it.
     if(vMode == VIDEOMODE_FORMAT7)
     {
       PixelFormat fmt7PixFmt;
-      PointGreyCamera::getFormat7PixelFormatFromString(fmt7Mode, config.format7_color_coding, fmt7PixFmt);
+      PointGreyCamera::getFormat7PixelFormatFromString(config.format7_color_coding, fmt7PixFmt);
       // Oh no, these all need to be converted into uints, so my pass by reference trick doesn't work
       uint16_t uwidth = (uint16_t)config.format7_roi_width;
       uint16_t uheight = (uint16_t)config.format7_roi_height;
@@ -128,7 +131,7 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   // Set white balance
   uint16_t blue = config.white_balance_blue;
   uint16_t red = config.white_balance_red;
-  retVal &= PointGreyCamera::setWhiteBalance(blue, red);
+  retVal &= PointGreyCamera::setWhiteBalance(config.auto_white_balance, blue, red);
   config.white_balance_blue = blue;
   config.white_balance_red = red;
 
@@ -170,9 +173,9 @@ void PointGreyCamera::setGain(double &gain)
   PointGreyCamera::setProperty(GAIN, false, gain);
 }
 
-void PointGreyCamera::setBRWhiteBalance(uint16_t &blue, uint16_t &red)
+void PointGreyCamera::setBRWhiteBalance(bool auto_white_balance, uint16_t &blue, uint16_t &red)
 {
-  PointGreyCamera::setWhiteBalance(blue, red);
+  PointGreyCamera::setWhiteBalance(auto_white_balance, blue, red);
 }
 
 void PointGreyCamera::setVideoMode(FlyCapture2::VideoMode &videoMode)
@@ -288,6 +291,12 @@ bool PointGreyCamera::setFormat7(FlyCapture2::Mode &fmt7Mode, FlyCapture2::Pixel
   error = cam_.SetFormat7Configuration(&fmt7ImageSettings, fmt7PacketInfo.recommendedBytesPerPacket);
   PointGreyCamera::handleError("PointGreyCamera::setFormat7 Could not send Format7 configuration to the camera", error);
 
+  // Get camera info to check if camera is running in color or mono mode
+  CameraInfo cInfo;
+  error = cam_.GetCameraInfo(&cInfo);
+  PointGreyCamera::handleError("PointGreyCamera::setFormat7  Failed to get camera info.", error);
+  isColor_ = cInfo.isColorCamera;
+
   return retVal;
 }
 
@@ -361,7 +370,7 @@ bool PointGreyCamera::getVideoModeFromString(std::string &vmode, FlyCapture2::Vi
   return retVal;
 }
 
-bool PointGreyCamera::getFormat7PixelFormatFromString(FlyCapture2::Mode &fmt7Mode, std::string &sformat, FlyCapture2::PixelFormat &fmt7PixFmt)
+bool PointGreyCamera::getFormat7PixelFormatFromString(std::string &sformat, FlyCapture2::PixelFormat &fmt7PixFmt)
 {
   // return true if we can set values as desired.
   bool retVal = true;
@@ -371,44 +380,32 @@ bool PointGreyCamera::getFormat7PixelFormatFromString(FlyCapture2::Mode &fmt7Mod
   Error error = cam_.GetCameraInfo(&cInfo);
   PointGreyCamera::handleError("PointGreyCamera::getFormat7PixelFormatFromString  Failed to get camera info.", error);
 
-  if(fmt7Mode == MODE_0)   // Only supports raw8 and raw16, since this is Bayer
+  if(cInfo.isColorCamera)
   {
-    if(cInfo.isColorCamera)
+    if(sformat.compare("raw8") == 0)
     {
-      if(sformat.compare("raw8") == 0)
-      {
-        fmt7PixFmt = PIXEL_FORMAT_RAW8;
-      }
-      else if(sformat.compare("raw16") == 0)
-      {
-        fmt7PixFmt = PIXEL_FORMAT_RAW16;
-      }
-      else
-      {
-        sformat = "raw8";
-        fmt7PixFmt = PIXEL_FORMAT_RAW8;
-        retVal &= false;
-      }
+      fmt7PixFmt = PIXEL_FORMAT_RAW8;
     }
-    else     // Is black and white
+    else if(sformat.compare("raw16") == 0)
     {
-      if(sformat.compare("mono8") == 0)
-      {
-        fmt7PixFmt = PIXEL_FORMAT_MONO8;
-      }
-      else if(sformat.compare("mono16") == 0)
-      {
-        fmt7PixFmt = PIXEL_FORMAT_MONO16;
-      }
-      else
-      {
-        sformat = "mono8";
-        fmt7PixFmt = PIXEL_FORMAT_MONO8;
-        retVal &= false;
-      }
+      fmt7PixFmt = PIXEL_FORMAT_RAW16;
+    }
+    else if(sformat.compare("mono8") == 0)
+    {
+      fmt7PixFmt = PIXEL_FORMAT_MONO8;
+    }
+    else if(sformat.compare("mono16") == 0)
+    {
+      fmt7PixFmt = PIXEL_FORMAT_MONO16;
+    }
+    else
+    {
+      sformat = "raw8";
+      fmt7PixFmt = PIXEL_FORMAT_RAW8;
+      retVal &= false;
     }
   }
-  else if(fmt7Mode == MODE_1 || fmt7Mode == MODE_2)     // Only supports mono8 and mono16, since these are made using pixel-binning
+  else     // Is black and white
   {
     if(sformat.compare("mono8") == 0)
     {
@@ -424,26 +421,6 @@ bool PointGreyCamera::getFormat7PixelFormatFromString(FlyCapture2::Mode &fmt7Mod
       fmt7PixFmt = PIXEL_FORMAT_MONO8;
       retVal &= false;
     }
-  }
-  else if(fmt7Mode == MODE_3)
-  {
-    if(cInfo.isColorCamera)
-    {
-      fmt7PixFmt = PIXEL_FORMAT_RAW16;
-      sformat = "raw16";
-    }
-    else
-    {
-      fmt7PixFmt = PIXEL_FORMAT_MONO16;
-      sformat = "mono16";
-    }
-  }
-  else     // Unrecognized mode or format, use safest
-  {
-    fmt7Mode = MODE_0;
-    sformat = "raw8";
-    fmt7PixFmt = PIXEL_FORMAT_RAW8;
-    retVal &= false;
   }
 
   return retVal;
@@ -557,72 +534,50 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
   return retVal;
 }
 
-bool PointGreyCamera::setWhiteBalance(uint16_t &blue, uint16_t &red)
+bool PointGreyCamera::setWhiteBalance(bool &auto_white_balance, uint16_t &blue, uint16_t &red)
 {
-  bool retVal = true;
-
   // Get camera info to check if color or black and white chameleon
   CameraInfo cInfo;
   Error error = cam_.GetCameraInfo(&cInfo);
-  PointGreyCamera::handleError("PointGreyCamera::setWhiteBalance  Failed to get camera info.", error);
+  handleError("PointGreyCamera::setWhiteBalance  Failed to get camera info.", error);
 
-  // Set the image encoding
-  if(cInfo.isColorCamera && blue > 0 && red > 0)  ///< @todo 11/15 hack to ignore white balance changes.
+  if(!cInfo.isColorCamera)
   {
-    // return true if we can set values as desired.
-    PropertyInfo pInfo;
-    pInfo.type = WHITE_BALANCE;
-    error = cam_.GetPropertyInfo(&pInfo);
-    PointGreyCamera::handleError("PointGreyCamera::setWhiteBalance Could not get property info.", error);
-
-    Property prop;
-    prop.type = WHITE_BALANCE;
-    prop.autoManualMode = (false || !pInfo.manualSupported);
-    prop.absControl = false;
-    prop.onOff = pInfo.onOffSupported;
-
-    if(blue < pInfo.min)
-    {
-      blue = pInfo.min;
-      retVal &= false;
-    }
-    else if(blue > pInfo.max)
-    {
-      blue = pInfo.max;
-      retVal &= false;
-    }
-    if(red < pInfo.min)
-    {
-      red = pInfo.min;
-      retVal &= false;
-    }
-    else if(red > pInfo.max)
-    {
-      red = pInfo.max;
-      retVal &= false;
-    }
-    prop.valueA = red; // I don't know why red comes first for them, maybe RGB?
-    prop.valueB = blue;
-    error = cam_.SetProperty(&prop);
-    PointGreyCamera::handleError("PointGreyCamera::setWhiteBalance  Failed to set value.", error);
-
-    // Read back setting to confirm
-    error = cam_.GetProperty(&prop);
-    PointGreyCamera::handleError("PointGreyCamera::setWhiteBalance  Failed to confirm value.", error);
-    if(!prop.autoManualMode)
-    {
-      red = prop.valueA;
-      blue = prop.valueB;
-    }
-  }
-  else if(blue != 0 || red != 0)    // Is a black and white camera and there are white balance settings.
-  {
-    retVal &= false;
-    blue = 0;
+    // Not a color camera, does not support auto white balance
+    auto_white_balance = false;
     red = 0;
+    blue = 0;
+    return false;
   }
 
-  return retVal;
+  unsigned white_balance_addr = 0x80c;
+  unsigned enable = 1 << 31;
+  unsigned value = 1 << 25;
+
+  if (auto_white_balance) {
+    PropertyInfo prop_info;
+    prop_info.type = WHITE_BALANCE;
+    error = cam_.GetPropertyInfo(&prop_info);
+    handleError("PointGreyCamera::setWhiteBalance  Failed to get property info.", error);
+    if (!prop_info.autoSupported) {
+      // This is typically because a color camera is in mono mode, so we set
+      // the red and blue to some reasonable value for later use
+      auto_white_balance = false;
+      blue = 800;
+      red = 550;
+      return false;
+    }
+    // Auto white balance is supported
+    error = cam_.WriteRegister(white_balance_addr, enable);
+    handleError("PointGreyCamera::setWhiteBalance  Failed to write to register.", error);
+    value |= 1 << 24;
+  } else {
+    // Manual mode
+    value |= blue << 12 | red;
+  }
+  error = cam_.WriteRegister(white_balance_addr, value);
+  handleError("PointGreyCamera::setWhiteBalance  Failed to write to register.", error);
+  return true;
 }
 
 void PointGreyCamera::setTimeout(const double &timeout)
@@ -820,6 +775,57 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   return retVal;
 }
 
+void PointGreyCamera::setGigEParameters(bool auto_packet_size, unsigned int packet_size, unsigned int packet_delay)
+{
+  auto_packet_size_ = auto_packet_size;
+  packet_size_ = packet_size;
+  packet_delay_ = packet_delay;
+}
+
+void PointGreyCamera::setupGigEPacketSize(PGRGuid & guid)
+{
+  GigECamera cam;
+  Error error;
+  error = cam.Connect(&guid);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not connect as GigE camera", error);
+  unsigned int packet_size;
+  error = cam.DiscoverGigEPacketSize(&packet_size);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not discover GigE packet_size", error);
+  GigEProperty prop;
+  prop.propType = PACKET_SIZE;
+  error = cam.GetGigEProperty(&prop);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not get GigE packet_size", error);
+  prop.value = packet_size;
+  error = cam.SetGigEProperty(&prop);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not set GigE packet_size", error);
+}
+
+void PointGreyCamera::setupGigEPacketSize(PGRGuid & guid, unsigned int packet_size)
+{
+  GigECamera cam;
+  Error error;
+  error = cam.Connect(&guid);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not connect as GigE camera", error);
+  GigEProperty prop;
+  prop.propType = PACKET_SIZE;
+  prop.value = packet_size;
+  error = cam.SetGigEProperty(&prop);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not set GigE packet_size", error);
+}
+
+void PointGreyCamera::setupGigEPacketDelay(PGRGuid & guid, unsigned int packet_delay)
+{
+  GigECamera cam;
+  Error error;
+  error = cam.Connect(&guid);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not connect as GigE camera", error);
+  GigEProperty prop;
+  prop.propType = PACKET_DELAY;
+  prop.value = packet_delay;
+  error = cam.SetGigEProperty(&prop);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not set GigE packet_delay", error);
+}
+
 void PointGreyCamera::connect()
 {
   if(!cam_.IsConnected())
@@ -839,8 +845,30 @@ void PointGreyCamera::connect()
       error  = busMgr_.GetCameraFromIndex(0, &guid);
       PointGreyCamera::handleError("PointGreyCamera::connect Failed to get first connected camera", error);
     }
+
+    FlyCapture2::InterfaceType ifType;
+    error = busMgr_.GetInterfaceTypeFromGuid(&guid, &ifType);
+    PointGreyCamera::handleError("PointGreyCamera::connect Failed to get interface style of camera", error);
+    if (ifType == FlyCapture2::INTERFACE_GIGE)
+    {
+		// Set packet size:
+        if (auto_packet_size_)
+            setupGigEPacketSize(guid);
+        else
+            setupGigEPacketSize(guid, packet_size_);
+
+        // Set packet delay:
+        setupGigEPacketDelay(guid, packet_delay_);
+    }
+
     error = cam_.Connect(&guid);
     PointGreyCamera::handleError("PointGreyCamera::connect Failed to connect to camera", error);
+
+    // Get camera info to check if camera is running in color or mono mode
+    CameraInfo cInfo;
+    error = cam_.GetCameraInfo(&cInfo);
+    PointGreyCamera::handleError("PointGreyCamera::connect  Failed to get camera info.", error);
+    isColor_ = cInfo.isColorCamera;
 
     // Enable metadata
     EmbeddedImageInfo info;
@@ -909,16 +937,13 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
     image.header.stamp.sec = embeddedTime.seconds;
     image.header.stamp.nsec = 1000 * embeddedTime.microSeconds;
 
-    // Get camera info to check if color or black and white chameleon and check the bits per pixel.
-    CameraInfo cInfo;
-    error = cam_.GetCameraInfo(&cInfo);
-    PointGreyCamera::handleError("PointGreyCamera::grabImage  Failed to get camera info.", error);
+    // Check the bits per pixel.
     uint8_t bitsPerPixel = rawImage.GetBitsPerPixel();
 
     // Set the image encoding
     std::string imageEncoding = sensor_msgs::image_encodings::MONO8;
     BayerTileFormat bayer_format = rawImage.GetBayerTileFormat();
-    if(cInfo.isColorCamera && bayer_format != NONE)
+    if(isColor_ && bayer_format != NONE)
     {
       if(bitsPerPixel == 16)
       {
@@ -985,16 +1010,31 @@ void PointGreyCamera::grabStereoImage(sensor_msgs::Image &image, const std::stri
     image.header.stamp.sec = embeddedTime.seconds;
     image.header.stamp.nsec = 1000 * embeddedTime.microSeconds;
 
-    // Get camera info to check if color or black and white chameleon and check the bits per pixel.
-    CameraInfo cInfo;
-    error = cam_.GetCameraInfo(&cInfo);
-    PointGreyCamera::handleError("PointGreyCamera::grabStereoImage  Failed to get camera info.", error);
+    // GetBitsPerPixel returns 16, but that seems to mean "2 8 bit pixels,
+    // one for each image". Therefore, we don't use it
+    //uint8_t bitsPerPixel = rawImage.GetBitsPerPixel();
 
     // Set the image encoding
     std::string imageEncoding = sensor_msgs::image_encodings::MONO8;
-    if(cInfo.isColorCamera)
+    BayerTileFormat bayer_format = rawImage.GetBayerTileFormat();
+
+    if(isColor_ && bayer_format != NONE)
     {
-      imageEncoding = sensor_msgs::image_encodings::BAYER_GRBG8;
+        switch(bayer_format)
+        {
+        case RGGB:
+          imageEncoding = sensor_msgs::image_encodings::BAYER_RGGB8;
+          break;
+        case GRBG:
+          imageEncoding = sensor_msgs::image_encodings::BAYER_GRBG8;
+          break;
+        case GBRG:
+          imageEncoding = sensor_msgs::image_encodings::BAYER_GBRG8;
+          break;
+        case BGGR:
+          imageEncoding = sensor_msgs::image_encodings::BAYER_BGGR8;
+          break;
+        }
     }
     else     // Mono camera
     {
@@ -1096,7 +1136,7 @@ std::vector<uint32_t> PointGreyCamera::getAttachedCameras()
   return cameras;
 }
 
-void PointGreyCamera::handleError(const std::string &prefix, FlyCapture2::Error &error) const
+void PointGreyCamera::handleError(const std::string &prefix, const FlyCapture2::Error &error)
 {
   if(error == PGRERROR_TIMEOUT)
   {
@@ -1108,6 +1148,6 @@ void PointGreyCamera::handleError(const std::string &prefix, FlyCapture2::Error 
     std::stringstream out;
     out << error.GetType();
     std::string desc(error.GetDescription());
-    throw std::runtime_error(prefix + start + out.str() + desc);
+    throw std::runtime_error(prefix + start + out.str() + " " + desc);
   }
 }

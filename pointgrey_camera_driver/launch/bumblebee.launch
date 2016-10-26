@@ -10,10 +10,10 @@
     <node pkg="nodelet" type="nodelet" name="bumblebee_nodelet"
           args="load pointgrey_camera_driver/PointGreyStereoCameraNodelet bumblebee_nodelet_manager" >
       <param name="frame_id" value="bumblebee" />
-
+      <param name="frame_rate" value="15" />
       <param name="first_namespace" value="left" />
       <param name="second_namespace" value="right" />
-	
+      <param name="format7_color_coding" value="raw16" />
       <param name="serial" value="$(arg bumblebee_serial)" />
       
       <!-- Use the camera_calibration package to create these files -->
@@ -21,6 +21,18 @@
              value="file://$(env HOME)/.ros/camera_info/$(arg bumblebee_serial).yaml" />
       <param name="second_info_url" if="$(arg calibrated)"
              value="file://$(env HOME)/.ros/camera_info/$(arg bumblebee_serial)_right.yaml" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="image_proc_debayer_left"
+        args="load image_proc/debayer bumblebee_nodelet_manager">
+      <remap from="image_raw" to="left/image_raw"/>
+      <remap from="image_mono" to="left/image_mono"/>
+      <remap from="image_color" to="left/image_color"/>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="image_proc_debayer_right"
+        args="load image_proc/debayer bumblebee_nodelet_manager">
+      <remap from="image_raw" to="right/image_raw"/>
+      <remap from="image_mono" to="right/image_mono"/>
+      <remap from="image_color" to="right/image_color"/>
     </node>
   </group>
 </launch>
