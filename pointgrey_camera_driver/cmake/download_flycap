@@ -44,15 +44,15 @@ LOGIN_DATA = {
 
 ARCHS = {
     'x86_64': (
-        'https://www.ptgrey.com/support/downloads/10617', (
-            'flycapture2-2.9.3.43-amd64/libflycapture-2.9.3.43_amd64.deb',
-            'flycapture2-2.9.3.43-amd64/libflycapture-2.9.3.43_amd64-dev.deb'),
-        'usr/lib/libflycapture.so.2.9.3.43'),
+        'https://www.ptgrey.com/support/downloads/10526', (
+            'flycapture2-2.8.3.1-amd64/libflycapture-2.8.3.1_amd64.deb',
+            'flycapture2-2.8.3.1-amd64/libflycapture-2.8.3.1_amd64-dev.deb'),
+        'usr/lib/libflycapture.so.2.8.3.1'),
     'i386': (
-        'https://www.ptgrey.com/support/downloads/10619', (
-            'flycapture2-2.9.3.43-i386/libflycapture-2.9.3.43_i386.deb',
-            'flycapture2-2.9.3.43-i386/libflycapture-2.9.3.43_i386-dev.deb'),
-        'usr/lib/libflycapture.so.2.9.3.43'),
+        'https://www.ptgrey.com/support/downloads/10528', (
+            'flycapture2-2.8.3.1-i386/libflycapture-2.8.3.1_i386.deb',
+            'flycapture2-2.8.3.1-i386/libflycapture-2.8.3.1_i386-dev.deb'),
+        'usr/lib/libflycapture.so.2.8.3.1'),
     'armv7': (
         'http://www.ptgrey.com/support/downloads/10047/', 
             'flycapture.2.6.3.4_armhf',
