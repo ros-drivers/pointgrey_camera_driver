@@ -360,6 +360,11 @@ bool PointGreyCamera::getVideoModeFromString(std::string &vmode, FlyCapture2::Vi
     fmt7Mode = MODE_3;
     vmode_out = VIDEOMODE_FORMAT7;
   }
+  else if(vmode.compare("format7_mode4") == 0)
+  {
+    fmt7Mode = MODE_4;
+    vmode_out = VIDEOMODE_FORMAT7;
+  }
   else    // Something not supported was asked of us, drop down into the most compatible mode
   {
     vmode = "640x480_mono8";
