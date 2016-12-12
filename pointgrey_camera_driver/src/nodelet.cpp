@@ -244,7 +244,6 @@ private:
     pnh.param<std::string>("camera_info_url", camera_info_url, "");
     // Get the desired frame_id, set to 'camera' if not found
     pnh.param<std::string>("frame_id", frame_id_, "camera");
-
     // Do not call the connectCb function until after we are done initializing.
     boost::mutex::scoped_lock scopedLock(connect_mutex_);
 
@@ -408,7 +407,7 @@ private:
             NODELET_DEBUG("Starting camera.");
             pg_.start();
             NODELET_INFO("Started camera.");
-
+            NODELET_INFO("Attention: if nothing subscribes to the camera topic, the camera_info is not published on the correspondent topic.");
             state = STARTED;
           }
           catch(std::runtime_error& e)
