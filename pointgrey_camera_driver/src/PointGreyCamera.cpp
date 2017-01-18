@@ -164,6 +164,22 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     default:
       retVal &= false;
   }
+	
+	
+  switch (config.strobe2_polarity)
+  {
+    case pointgrey_camera_driver::PointGrey_Low:
+    case pointgrey_camera_driver::PointGrey_High:
+      {
+      bool temp = config.strobe2_polarity;
+      retVal &= PointGreyCamera::setExternalStrobe(config.enable_strobe2, pointgrey_camera_driver::PointGrey_GPIO2, config.strobe2_duration, config.strobe2_delay, temp);
+      config.strobe2_polarity = temp;
+      }
+      break;
+    default:
+      retVal &= false;
+  }
+
 
   return retVal;
 }
