@@ -54,12 +54,17 @@ ARCHS = {
             'flycapture2-2.9.3.43-i386/libflycapture-2.9.3.43_i386-dev.deb'),
         'usr/lib/libflycapture.so.2.9.3.43'),
     'armv7': (
-        'http://www.ptgrey.com/support/downloads/10047/', 
+        'http://www.ptgrey.com/support/downloads/10047/',
             'flycapture.2.6.3.4_armhf',
-            'usr/lib/libflycapture.so.2.6.3.4')
+            'usr/lib/libflycapture.so.2.6.3.4'),
+    'armv8': (
+        'http://www.ptgrey.com/support/downloads/10703/',
+        'flycapture.2.10.3.266_arm64',
+        'usr/lib/libflycapture.so.2.10.3.266')
     }
 
-if (sys.argv[1] == 'armv7'):
+print sys.argv[1]
+if (sys.argv[1] == 'armv7' or sys.argv[1] == 'armv8'):
     archive_url, folder_name, shared_library = ARCHS[sys.argv[1]]
 else:
     archive_url, debs, shared_library = ARCHS[sys.argv[1]]
@@ -81,7 +86,7 @@ logging.info("Unpacking tarball.")
 with tarfile.open(mode="r:gz", fileobj=cStringIO.StringIO(resp.read())) as tar:
     tar.extractall()
 
-if (sys.argv[1] == 'armv7'):
+if (sys.argv[1] == 'armv7' or sys.argv[1] == 'armv8'):
     logging.info("Copying ARM libs from: %s to %s", shared_library, library_dest)
 
     # Creating (current_folder)/usr folder to eliminate need for if branching in 
