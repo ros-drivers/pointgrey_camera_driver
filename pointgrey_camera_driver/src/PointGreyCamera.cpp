@@ -575,11 +575,14 @@ bool PointGreyCamera::setWhiteBalance(bool &auto_white_balance, uint16_t &blue, 
     // Auto white balance is supported
     error = cam_.WriteRegister(white_balance_addr, enable);
     handleError("PointGreyCamera::setWhiteBalance  Failed to write to register.", error);
+    // Auto mode
     value |= 1 << 24;
   } else {
     // Manual mode
-    value |= blue << 12 | red;
+    value |= 0 << 24;
   }
+  // Blue is bits 8-19 (0 is MSB), red is 20-31.
+  value |= blue << 12 | red;
   error = cam_.WriteRegister(white_balance_addr, value);
   handleError("PointGreyCamera::setWhiteBalance  Failed to write to register.", error);
   return true;
