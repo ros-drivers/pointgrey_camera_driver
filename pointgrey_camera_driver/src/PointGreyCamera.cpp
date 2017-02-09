@@ -143,7 +143,7 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
       {
       bool temp = config.trigger_polarity;
       retVal &= PointGreyCamera::setExternalTrigger(config.enable_trigger, config.trigger_mode, config.trigger_source, config.trigger_parameter, config.trigger_delay, temp);
-      config.strobe1_polarity = temp;
+      config.strobe_polarity = temp;
       }
       break;
     default:
@@ -151,14 +151,14 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   }
 
   // Set strobe
-  switch (config.strobe1_polarity)
+  switch (config.strobe_polarity)
   {
     case pointgrey_camera_driver::PointGrey_Low:
     case pointgrey_camera_driver::PointGrey_High:
       {
-      bool temp = config.strobe1_polarity;
-      retVal &= PointGreyCamera::setExternalStrobe(config.enable_strobe1, pointgrey_camera_driver::PointGrey_GPIO1, config.strobe1_duration, config.strobe1_delay, temp);
-      config.strobe1_polarity = temp;
+      bool temp = config.strobe_polarity;
+      retVal &= PointGreyCamera::setExternalStrobe(config.enable_strobe, config.strobe_source, config.strobe_duration, config.strobe_delay, temp);
+      config.strobe_polarity = temp;
       }
       break;
     default:
