@@ -59,22 +59,24 @@ public:
 
   ~PointGreyCameraNodelet()
   {
+    boost::mutex::scoped_lock scopedLock(connect_mutex_);
+
     if(pubThread_)
     {
       pubThread_->interrupt();
       pubThread_->join();
-    }
 
-    try
-    {
-      NODELET_DEBUG("Stopping camera capture.");
-      pg_.stop();
-      NODELET_DEBUG("Disconnecting from camera.");
-      pg_.disconnect();
-    }
-    catch(std::runtime_error& e)
-    {
-      NODELET_ERROR("%s", e.what());
+      try
+      {
+        NODELET_DEBUG("Stopping camera capture.");
+        pg_.stop();
+        NODELET_DEBUG("Disconnecting from camera.");
+        pg_.disconnect();
+      }
+      catch(std::runtime_error& e)
+      {
+        NODELET_ERROR("%s", e.what());
+      }
     }
   }
 
@@ -158,34 +160,38 @@ private:
     // Check if we should disconnect (there are 0 subscribers to our data)
     if(it_pub_.getNumSubscribers() == 0 && pub_->getPublisher().getNumSubscribers() == 0)
     {
-      NODELET_DEBUG("Disconnecting.");
-      pubThread_->interrupt();
-      scopedLock.unlock();
-      pubThread_->join();
-      scopedLock.lock();
-      sub_.shutdown();
+      if (pubThread_)
+      {
+        NODELET_DEBUG("Disconnecting.");
+        pubThread_->interrupt();
+        scopedLock.unlock();
+        pubThread_->join();
+        scopedLock.lock();
+        pubThread_.reset();
+        sub_.shutdown();
 
-      try
-      {
-        NODELET_DEBUG("Stopping camera capture.");
-        pg_.stop();
-      }
-      catch(std::runtime_error& e)
-      {
-        NODELET_ERROR("%s", e.what());
-      }
+        try
+        {
+          NODELET_DEBUG("Stopping camera capture.");
+          pg_.stop();
+        }
+        catch(std::runtime_error& e)
+        {
+          NODELET_ERROR("%s", e.what());
+        }
 
-      try
-      {
-        NODELET_DEBUG("Disconnecting from camera.");
-        pg_.disconnect();
-      }
-      catch(std::runtime_error& e)
-      {
-        NODELET_ERROR("%s", e.what());
+        try
+        {
+          NODELET_DEBUG("Disconnecting from camera.");
+          pg_.disconnect();
+        }
+        catch(std::runtime_error& e)
+        {
+          NODELET_ERROR("%s", e.what());
+        }
       }
     }
-    else if(!sub_)     // We need to connect
+    else if(!pubThread_)     // We need to connect
     {
       // Start the thread to loop through and publish messages
       pubThread_.reset(new boost::thread(boost::bind(&pointgrey_camera_driver::PointGreyCameraNodelet::devicePoll, this)));
