@@ -981,7 +981,21 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
     {
       if(bitsPerPixel == 16)
       {
-        imageEncoding = sensor_msgs::image_encodings::MONO16; // 16 bit bayer not supported yet in ROS
+        switch(bayer_format)
+        {
+          case RGGB:
+            imageEncoding = sensor_msgs::image_encodings::BAYER_RGGB16;
+            break;
+          case GRBG:
+            imageEncoding = sensor_msgs::image_encodings::BAYER_GRBG16;
+            break;
+          case GBRG:
+            imageEncoding = sensor_msgs::image_encodings::BAYER_GBRG16;
+            break;
+          case BGGR:
+            imageEncoding = sensor_msgs::image_encodings::BAYER_BGGR16;
+            break;
+        }
       }
       else
       {
