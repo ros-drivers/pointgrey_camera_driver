@@ -33,6 +33,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include <iostream>
 #include <sstream>
+#include <flycapture/FlyCapture2Defs.h>
 
 using namespace FlyCapture2;
 
@@ -893,6 +894,18 @@ void PointGreyCamera::connect()
 
         // Set packet delay:
         setupGigEPacketDelay(guid, packet_delay_);
+
+        // Enable packet resend
+        GigECamera cam;
+        Error error;
+        error = cam.Connect(&guid);
+        PointGreyCamera::handleError("PointGreyCamera::connect could not connect as GigE camera", error);
+        GigEConfig gigeconfig;
+        error = cam.GetGigEConfig(&gigeconfig);
+        PointGreyCamera::handleError("PointGreyCamera::GetGigEConfig could not get GigE setting", error);
+        gigeconfig.enablePacketResend = true;
+        error = cam.SetGigEConfig(&gigeconfig);
+        PointGreyCamera::handleError("PointGreyCamera::SetGigEConfig could not set GigE settings (packet resend)", error);
     }
 
     error = cam_.Connect(&guid);
