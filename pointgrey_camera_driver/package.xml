@@ -31,11 +31,12 @@
   <run_depend>wfov_camera_msgs</run_depend>
   <run_depend>image_exposure_msgs</run_depend>
   <run_depend>image_proc</run_depend>
+  <run_depend>stereo_image_proc</run_depend>
   <run_depend>camera_info_manager</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>diagnostic_updater</run_depend>
- 
+
   <!-- Dependencies of libflycapture -->
   <build_depend>libusb-1.0-dev</build_depend>
   <build_depend>libraw1394-dev</build_depend>
@@ -43,6 +44,6 @@
   <run_depend>libraw1394-dev</run_depend>
 
   <export>
-    <nodelet plugin="${prefix}/nodelet_plugins.xml" /> 
+    <nodelet plugin="${prefix}/nodelet_plugins.xml" />
   </export>
 </package>
