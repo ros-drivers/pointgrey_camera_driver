@@ -19,7 +19,7 @@ catkin_package(
 # the Point Grey EULA prohibits redistributing the headers or the packages which
 # contains them. Fortunately, we can download the archive directly from their 
 # website during this build process.
-find_library(POINTGREY_LIB flycapture)
+find_library(POINTGREY_LIB NAMES libflycapture.so.2 flycapture)
 if(NOT POINTGREY_LIB)
   message(STATUS "libflycapture not found in system library path")
   include(cmake/DownloadFlyCap.cmake)
@@ -27,6 +27,13 @@ if(NOT POINTGREY_LIB)
   message(STATUS "libflycapture library: ${POINTGREY_LIB}")
   message(STATUS "libflycapture include: ${POINTGREY_INCLUDE_DIR}")
   include_directories(${POINTGREY_INCLUDE_DIR})  
+else()
+  # flycapture exists on the machine copy it into the build directory/resolving all symlinks
+  message(STATUS "libflycapture library found on system: ${POINTGREY_LIB}")
+  GET_FILENAME_COMPONENT(REAL_FLYCAPTURE ${POINTGREY_LIB} REALPATH)
+  configure_file(${REAL_FLYCAPTURE} ${CMAKE_CURRENT_BINARY_DIR}/${POINTGREY_LIB} COPYONLY)  
+  set(POINTGREY_LIB ${CMAKE_CURRENT_BINARY_DIR}/${POINTGREY_LIB})
+  message(STATUS "Flycapture lib copied from : ${REAL_FLYCAPTURE} into ${POINTGREY_LIB}")
 endif()
 
 include_directories(include ${catkin_INCLUDE_DIRS})
