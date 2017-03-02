@@ -435,9 +435,8 @@ private:
 
             wfov_image->temperature = pg_.getCameraTemperature();
 
-            ros::Time time = ros::Time::now();
-            wfov_image->header.stamp = time;
-            wfov_image->image.header.stamp = time;
+            //time in the image header is synced
+            wfov_image->header.stamp = wfov_image->image.header.stamp;
 
             // Set the CameraInfo message
             ci_.reset(new sensor_msgs::CameraInfo(cinfo_->getCameraInfo()));
