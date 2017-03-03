@@ -49,6 +49,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include <dynamic_reconfigure/server.h> // Needed for the dynamic_reconfigure gui service to run
 
+#include <fstream>
+
 namespace pointgrey_camera_driver
 {
 
@@ -233,6 +235,22 @@ private:
       NODELET_DEBUG("Serial XMLRPC type.");
       serial = 0;
     }
+
+    std::string camera_serial_path;
+    pnh.param<std::string>("camera_serial_path", camera_serial_path, "");
+    NODELET_INFO("Camera serial path %s", camera_serial_path.c_str());
+    // If serial has been provided directly as a param, ignore the path
+    // to read in the serial from.
+    while (serial == 0 && !camera_serial_path.empty())
+    {
+      serial = readSerialAsHexFromFile(camera_serial_path);
+      if (serial == 0)
+      {
+        NODELET_WARN("Waiting for camera serial path to become available");
+        ros::Duration(1.0).sleep(); // Sleep for 1 second, wait for serial device path to become available
+      }
+    }
+
     NODELET_INFO("Using camera serial %d", serial);
 
     pg_.setDesiredCamera((uint32_t)serial);
@@ -291,6 +309,37 @@ private:
                diagnostic_updater::FrequencyStatusParam(&min_freq_, &max_freq_, freq_tolerance, window_size),
                diagnostic_updater::TimeStampStatusParam(min_acceptable, max_acceptable)));
   }
+
+  /**
+   * @brief Reads in the camera serial from a specified file path.
+   * The format of the serial is expected to be base 16.
+   * @param camera_serial_path The path of where to read in the serial from. Generally this
+   * is a USB device path to the serial file.
+   * @return int The serial number for the given path, 0 if failure.
+   */
+  int readSerialAsHexFromFile(std::string camera_serial_path)
+  {
+    NODELET_DEBUG("Reading camera serial file from: %s", camera_serial_path.c_str());
+
+    std::ifstream serial_file(camera_serial_path.c_str());
+    std::stringstream buffer;
+    int serial = 0;
+
+    if (serial_file.is_open())
+    {
+      std::string serial_str((std::istreambuf_iterator<char>(serial_file)), std::istreambuf_iterator<char>());
+      NODELET_DEBUG("Serial file contents: %s", serial_str.c_str());
+      buffer << std::hex << serial_str;
+      buffer >> serial;
+      NODELET_DEBUG("Serial discovered %d", serial);
+
+      return serial;
+    }
+
+    NODELET_WARN("Unable to open serial path: %s", camera_serial_path.c_str());
+    return 0;
+  }
+
 
   /*!
   * \brief Function for the boost::thread to grabImages and publish them.
