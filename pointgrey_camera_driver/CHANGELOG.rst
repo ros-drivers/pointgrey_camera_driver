@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.13.0 (2017-03-17)
+-------------------
 * Adding param to provide path to serial location.
 * Fix flycapture install when using local copy.
 * Fix thread leaking issue.
