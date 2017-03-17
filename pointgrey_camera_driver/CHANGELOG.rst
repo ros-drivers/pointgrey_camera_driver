@@ -2,6 +2,24 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Adding param to provide path to serial location.
+* Fix flycapture install when using local copy.
+* Fix thread leaking issue.
+* Added stereo launch file and enabled roslaunch checkes for all launch files.
+* Enabling GigE packet resend by default (`#97 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/97>`_)
+* Enabling 16bit Bayer format (`#98 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/98>`_)
+* Allow strobe shorter than 1ms (`#99 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/99>`_)
+* Add option to strobe on GPIO2. (`#91 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/91>`_)
+* Added Format7_Mode5 and Format7_Mode7 options for Video Modes. (`#90 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/90>`_)
+* Improve white balance initialisation and logic. (`#95 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/95>`_)
+* Added Format7_Mode4 option for Video Modes. (`#87 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/87>`_)
+* Added new camera model (`#86 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/86>`_)
+* Added the option to use the format7_mode4. (`#84 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/84>`_)
+* Adding string parameter fallback. (`#81 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/81>`_)
+* Contributors: Benjamin Blumer, Brian Holt, Devon Ash, Enrique Fernandez, Kazumi Malhan, Léonard Gérard, Mike O'Driscoll, Nicola Castaman, Tony Baltovski, Tracey Spicer, fabrizioschiano
+
 0.12.2 (2016-09-30)
 -------------------
 * Reconnect on error (`#79 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/79>`_)
