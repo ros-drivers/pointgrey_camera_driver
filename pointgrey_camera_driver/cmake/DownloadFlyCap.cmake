@@ -5,11 +5,10 @@ function(download_flycap POINTGREY_LIB_VAR POINTGREY_INCLUDE_DIR_VAR)
 
   # set architecture
   include(cmake/TargetArch.cmake)
-  # set release
-  execute_process(COMMAND lsb_release -c COMMAND awk "{print $2}" OUTPUT_VARIABLE CODE_NAME)
-  #message(WARNING ${CODE_NAME})
-
   target_architecture(POINTGREY_ARCH)
+  # set release
+  execute_process(COMMAND lsb_release -c COMMAND awk "{print $2}" OUTPUT_VARIABLE RAW_CODE_NAME)
+  string(STRIP ${RAW_CODE_NAME} CODE_NAME)
 
   set(POINTGREY_LIB "${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_LIB_DESTINATION}/libflycapture.so.2")
   set(DOWNLOAD_SCRIPT "${PROJECT_SOURCE_DIR}/cmake/download_flycap")

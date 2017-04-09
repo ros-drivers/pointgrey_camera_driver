@@ -48,7 +48,7 @@ VERSION = {
         'https://www.ptgrey.com/support/downloads/10617/', (
             'flycapture2-2.9.3.43-amd64/libflycapture-2.9.3.43_amd64.deb',
             'flycapture2-2.9.3.43-amd64/libflycapture-2.9.3.43_amd64-dev.deb'),
-        'usr/lib/libflycapture.so.2.9.3.43')
+        'usr/lib/libflycapture.so.2.9.3.43'),
       'xenial': (
         'https://www.ptgrey.com/support/downloads/10705', (
             'flycapture2-2.10.3.266-amd64/libflycapture-2.10.3.266_amd64.deb',
