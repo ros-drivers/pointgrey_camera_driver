@@ -14,30 +14,40 @@ catkin_package(
   CATKIN_DEPENDS roscpp nodelet
 )
 
-# If the user has manually installed flycapture, use the system path version. If not,
-# download it. We can't resolve this dependency using the usual rosdep means because
+# If flycapture is already present, use the found version. If not, download it.
+# We can't resolve this dependency using the usual rosdep means because
 # the Point Grey EULA prohibits redistributing the headers or the packages which
-# contains them. Fortunately, we can download the archive directly from their
-# website during this build process.
+# contains them. We work around this by downloading the archive directly from
+# their website during this step in the build process.
 find_library(POINTGREY_LIB NAMES libflycapture.so.2 flycapture)
 if(NOT POINTGREY_LIB)
+  # flycapture not present, must download.
   message(STATUS "libflycapture not found in system library path")
   include(cmake/DownloadFlyCap.cmake)
   download_flycap(POINTGREY_LIB POINTGREY_INCLUDE_DIR)
   message(STATUS "libflycapture library: ${POINTGREY_LIB}")
   message(STATUS "libflycapture include: ${POINTGREY_INCLUDE_DIR}")
-  include_directories(${POINTGREY_INCLUDE_DIR})
 else()
-  # flycapture exists on the machine copy it into the build directory/resolving all symlinks
-  message(STATUS "libflycapture found in system library path")
-  message(STATUS "libflycapture library: ${POINTGREY_LIB}")
-  GET_FILENAME_COMPONENT(REAL_FLYCAPTURE ${POINTGREY_LIB} REALPATH)
-  configure_file(${REAL_FLYCAPTURE} ${CMAKE_CURRENT_BINARY_DIR}/${POINTGREY_LIB} COPYONLY)
-  set(POINTGREY_LIB ${CMAKE_CURRENT_BINARY_DIR}/${POINTGREY_LIB})
-  message(STATUS "libflycapture copied from : ${REAL_FLYCAPTURE} into ${POINTGREY_LIB}")
+  string(FIND "${POINTGREY_LIB}" "${CATKIN_DEVEL_PREFIX}" SUBSTR_INDEX)
+  if(${SUBSTR_INDEX} EQUAL 0)
+    # found flycapture, but it's already in our build space; we're reconfiguring.
+    message(STATUS "libflycapture found in: ${POINTGREY_LIB}")
+    set(POINTGREY_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/usr/include")
+  else()
+    # copy it into the build directory/resolving all symlinks
+    message(STATUS "libflycapture found in system library path")
+    message(STATUS "libflycapture library: ${POINTGREY_LIB}")
+
+    get_filename_component(REAL_FLYCAPTURE ${POINTGREY_LIB} REALPATH)
+    get_filename_component(POINTGREY_LIB ${POINTGREY_LIB} NAME)
+    set(POINTGREY_LIB "${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_LIB_DESTINATION}/${POINTGREY_LIB}")
+
+    configure_file(${REAL_FLYCAPTURE} ${POINTGREY_LIB} COPYONLY)
+    message(STATUS "libflycapture copied from: ${REAL_FLYCAPTURE} into ${POINTGREY_LIB}")
+  endif()
 endif()
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${POINTGREY_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 add_library(PointGreyCamera src/PointGreyCamera.cpp)
 target_link_libraries(PointGreyCamera ${POINTGREY_LIB} ${catkin_LIBRARIES})
