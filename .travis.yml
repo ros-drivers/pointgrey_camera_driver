@@ -20,6 +20,7 @@ script:
   - cd ~/catkin_ws
   - source /opt/ros/$CI_ROS_DISTRO/setup.bash
   - catkin_make
+  - catkin_make --force-cmake
   - catkin_make run_tests
   - catkin_test_results .
   - catkin_make install
