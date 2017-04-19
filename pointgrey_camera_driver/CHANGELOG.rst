@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.13.1 (2017-04-19)
+-------------------
 * Add flycapture2 lib download rule for aarch64(e.g. Jetson TX1) (`#93 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/93>`_)
 * Make flycap d/l logic work on re-build. (`#109 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/109>`_)
 * Fix missing roslaunch dep, package format 2.
