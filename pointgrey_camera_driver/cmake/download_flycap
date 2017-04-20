@@ -42,34 +42,59 @@ LOGIN_DATA = {
     'Password': 'uNjRxoH6NMsJvi6hyPCH'
     }
 
-ARCHS = {
-    'x86_64': (
-        'https://www.ptgrey.com/support/downloads/10617', (
+VERSION = {
+    'x86_64':
+    { 'trusty': (
+        'https://www.ptgrey.com/support/downloads/10617/', (
             'flycapture2-2.9.3.43-amd64/libflycapture-2.9.3.43_amd64.deb',
             'flycapture2-2.9.3.43-amd64/libflycapture-2.9.3.43_amd64-dev.deb'),
         'usr/lib/libflycapture.so.2.9.3.43'),
-    'i386': (
+      'xenial': (
+        'https://www.ptgrey.com/support/downloads/10705', (
+            'flycapture2-2.10.3.266-amd64/libflycapture-2.10.3.266_amd64.deb',
+            'flycapture2-2.10.3.266-amd64/libflycapture-2.10.3.266_amd64-dev.deb'),
+        'usr/lib/libflycapture.so.2.10.3.266')
+    },
+    'i386':
+    { 'trusty': (
         'https://www.ptgrey.com/support/downloads/10619', (
             'flycapture2-2.9.3.43-i386/libflycapture-2.9.3.43_i386.deb',
             'flycapture2-2.9.3.43-i386/libflycapture-2.9.3.43_i386-dev.deb'),
         'usr/lib/libflycapture.so.2.9.3.43'),
-    'armv7': (
-        'http://www.ptgrey.com/support/downloads/10047/',
-            'flycapture.2.6.3.4_armhf',
-            'usr/lib/libflycapture.so.2.6.3.4'),
-    'armv8': (
-        'http://www.ptgrey.com/support/downloads/10703/',
-        'flycapture.2.10.3.266_arm64',
+      'xenial': (
+        'https://www.ptgrey.com/support/downloads/10704/', (
+            'flycapture2-2.10.3.266-i386/libflycapture-2.10.3.266_i386.deb',
+            'flycapture2-2.10.3.266-i386/libflycapture-2.10.3.266_i386-dev.deb'),
         'usr/lib/libflycapture.so.2.10.3.266')
+    },
+    'armv7':
+    { 'trusty':(
+        'http://www.ptgrey.com/support/downloads/10618/',
+            'flycapture.2.9.3.43_armhf',
+            'usr/lib/libflycapture.so.2.9.3.43'),
+      'xenial':(
+        'http://www.ptgrey.com/support/downloads/10702/',
+            'flycapture.2.10.3.266_armhf',
+            'usr/lib/libflycapture.so.2.10.3.266')
+     },
+    'armv8':
+    { 'trusty':(
+        'https://www.ptgrey.com/support/downloads/10616/',
+        'flycapture.2.9.3.43_arm64',
+        'usr/lib/libflycapture.so.2.9.3.43'),
+      'xenial':(
+        'http://www.ptgrey.com/support/downloads/10703/',
+            'flycapture.2.10.3.266_arm64',
+            'usr/lib/libflycapture.so.2.10.3.266')
     }
+}
 
-print sys.argv[1]
 if (sys.argv[1] == 'armv7' or sys.argv[1] == 'armv8'):
-    archive_url, folder_name, shared_library = ARCHS[sys.argv[1]]
+    archive_url, folder_name, shared_library = VERSION[sys.argv[1]][sys.argv[2]]
 else:
-    archive_url, debs, shared_library = ARCHS[sys.argv[1]]
+    archive_url, debs, shared_library = VERSION[sys.argv[1]][sys.argv[2]]
 
-library_dest = sys.argv[2]
+library_dest = sys.argv[3]
 
 logging.info("Logging into ptgrey.com.")
 cj = cookielib.CookieJar()
