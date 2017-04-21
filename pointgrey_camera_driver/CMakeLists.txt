@@ -20,7 +20,8 @@ catkin_package(
 # contains them. We work around this by downloading the archive directly from
 # their website during this step in the build process.
 find_library(POINTGREY_LIB NAMES libflycapture.so.2 flycapture)
-if(NOT POINTGREY_LIB)
+file(GLOB_RECURSE POINTGREY_HEADER ${POINTGREY_INCLUDE_DIR}*/flycapture/FlyCapture2.h ${CMAKE_CURRENT_BINARY_DIR}/usr/include*/flycapture/FlyCapture2.h)
+if(NOT POINTGREY_LIB OR NOT POINTGREY_HEADER)
   # flycapture not present, must download.
   message(STATUS "libflycapture not found in system library path")
   include(cmake/DownloadFlyCap.cmake)
