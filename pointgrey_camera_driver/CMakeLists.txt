@@ -94,6 +94,22 @@ install(FILES nodelet_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION
 
 install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
+if(CATKIN_BUILD_BINARY_PACKAGE)
+  # Install udev rules with dh_installudev: http://manpages.ubuntu.com/manpages/man1/dh_installudev.1.html
+  STRING(REPLACE "_" "-" DEBIAN_PACKAGE_NAME ros-$ENV{ROS_DISTRO}-${PROJECT_NAME})
+  FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/debian/${DEBIAN_PACKAGE_NAME}.udev)
+  FILE(GLOB UDEV_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/udev" "${CMAKE_CURRENT_SOURCE_DIR}/udev/*.rules")
+  FOREACH(FILENAME ${UDEV_FILES})
+    MESSAGE(STATUS "Appending contents of udev/${FILENAME} to debian/${DEBIAN_PACKAGE_NAME}.udev")
+    FILE(READ udev/${FILENAME} FILEDATA)
+    FILE(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/debian/${DEBIAN_PACKAGE_NAME}.udev ${FILEDATA})
+  ENDFOREACH(FILENAME)
+else()
+  install(DIRECTORY udev
+          DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  )
+endif()
+
 if (CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
   roslaunch_add_file_check(launch/bumblebee.launch)
