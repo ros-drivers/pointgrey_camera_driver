@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+#DEBHELPER#
+
+# A udev rules file was added during install, load and trigger rules
+if [ "$1" = configure ]; then
+  if which udevadm > /dev/null; then
+    set +e # Disable exit on error
+    udevadm control --reload-rules
+    service udev restart
+    udevadm trigger
+    set -e # Re-enable exit on error
+  fi
+fi
+
