@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pointgrey_camera_driver)
 
+add_definitions(-std=c++11)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp nodelet sensor_msgs wfov_camera_msgs
   image_exposure_msgs camera_info_manager image_transport
@@ -9,6 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
 generate_dynamic_reconfigure_options(
   cfg/PointGrey.cfg
 )
+
+find_package(Eigen3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIR})
 
 catkin_package(
   CATKIN_DEPENDS roscpp nodelet
@@ -49,8 +54,11 @@ endif()
 
 include_directories(include ${POINTGREY_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
+add_library(TimeSyncLib src/TimeSyncEKF.cpp)
+target_link_libraries(TimeSyncLib ${catkin_LIBRARIES})
+
 add_library(PointGreyCamera src/PointGreyCamera.cpp)
-target_link_libraries(PointGreyCamera ${POINTGREY_LIB} ${catkin_LIBRARIES})
+target_link_libraries(PointGreyCamera ${POINTGREY_LIB} ${catkin_LIBRARIES} TimeSyncLib)
 add_dependencies(PointGreyCamera ${PROJECT_NAME}_gencfg)
 
 add_library(PointGreyCameraNodelet src/nodelet.cpp)

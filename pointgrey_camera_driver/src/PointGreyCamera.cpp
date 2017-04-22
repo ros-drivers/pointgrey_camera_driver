@@ -165,8 +165,8 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     default:
       retVal &= false;
   }
-	
-	
+
+
   switch (config.strobe2_polarity)
   {
     case pointgrey_camera_driver::PointGrey_Low:
@@ -979,10 +979,32 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
     PointGreyCamera::handleError("PointGreyCamera::grabImage Failed to retrieve buffer", error);
     metadata_ = rawImage.GetMetadata();
 
-    // Set header timestamp as embedded for now
-    TimeStamp embeddedTime = rawImage.GetTimeStamp();
-    image.header.stamp.sec = embeddedTime.seconds;
-    image.header.stamp.nsec = 1000 * embeddedTime.microSeconds;
+
+    TimeStamp currentTime = rawImage.GetTimeStamp();
+    int delta_cycle_seconds = currentTime.cycleSeconds - last_timestamp_.cycleSeconds;
+    if(delta_cycle_seconds < 0){
+      delta_cycle_seconds += 128;
+    }
+
+    int delta_cycle_count = currentTime.cycleCount - last_timestamp_.cycleCount;
+    if(delta_cycle_count < 0){
+      delta_cycle_count += 8000;
+    }
+
+    comulative_timestamp_.microSeconds += delta_cycle_count*125; //will go over 1e6
+    comulative_timestamp_.seconds += delta_cycle_seconds;
+    comulative_timestamp_.microSeconds = comulative_timestamp_.microSeconds%1000000;
+
+    last_timestamp_ = currentTime;
+
+    //get time in local clock
+    double device_time = comulative_timestamp_.seconds + comulative_timestamp_.microSeconds*1.0e-6;
+    double local_time = ros::Time::now().toSec();
+
+    timesync_.updateFilter(device_time, local_time);
+    double updated_local_time = timesync_.getLocalTimestamp(device_time);
+
+    image.header.stamp = ros::Time(updated_local_time);
 
     // Check the bits per pixel.
     uint8_t bitsPerPixel = rawImage.GetBitsPerPixel();

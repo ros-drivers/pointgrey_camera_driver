@@ -44,7 +44,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 // FlyCapture SDK from Point Grey
 #include "flycapture/FlyCapture2.h"
+#include <flycapture/FlyCapture2Defs.h>
 
+//time sync
+#include "pointgrey_camera_driver/TimeSyncEKF.h"
 
 class PointGreyCamera
 {
@@ -193,6 +196,12 @@ private:
   unsigned int packet_size_;
   /// GigE packet delay:
   unsigned int packet_delay_;
+
+  //time sync
+  FlyCapture2::TimeStamp last_timestamp_;
+  FlyCapture2::TimeStamp comulative_timestamp_;
+
+  time_sync::TimeSyncEKF timesync_;
 
   /*!
   * \brief Changes the video mode of the connected camera.
