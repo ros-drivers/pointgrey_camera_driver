@@ -65,6 +65,7 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   VideoMode vMode; // video mode desired
   Mode fmt7Mode; // fmt7Mode to set
   retVal &= PointGreyCamera::getVideoModeFromString(config.video_mode, vMode, fmt7Mode);
+
   // Only change video mode if we have to.
   // dynamic_reconfigure will report anything other than LEVEL_RECONFIGURE_RUNNING if we need to change videomode.
   if(level != PointGreyCamera::LEVEL_RECONFIGURE_RUNNING)
@@ -84,7 +85,6 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
       config.format7_roi_height = uheight;
       config.format7_x_offset = uoffsetx;
       config.format7_y_offset = uoffsety;
-
     }
     else
     {
@@ -103,8 +103,10 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
 
   // Set exposure
   retVal &= PointGreyCamera::setProperty(AUTO_EXPOSURE, config.auto_exposure, config.exposure);
+
   // Set sharpness
   retVal &= PointGreyCamera::setProperty(SHARPNESS, config.auto_sharpness, config.sharpness);
+
   // Set saturation
   retVal &= PointGreyCamera::setProperty(SATURATION, config.auto_saturation, config.saturation);
 
@@ -127,11 +129,11 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   retVal &= PointGreyCamera::setProperty(TILT, false, tilt, not_used);
   config.tilt = tilt;
 
-  // Set BRIGHTNESS
-  retVal &= PointGreyCamera::setProperty(BRIGHTNESS, true, config.brightness);
+  // Set brightness
+  retVal &= PointGreyCamera::setProperty(BRIGHTNESS, false, config.brightness);
 
-
-
+  // Set gamma
+  retVal &= PointGreyCamera::setProperty(GAMMA, false, config.gamma);
 
   // Set white balance
   uint16_t blue = config.white_balance_blue;
@@ -184,9 +186,6 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     default:
       retVal &= false;
   }
-
-
-
 
 
   return retVal;
@@ -437,7 +436,6 @@ bool PointGreyCamera::getFormat7PixelFormatFromString(std::string &sformat, FlyC
     {
       fmt7PixFmt = PIXEL_FORMAT_MONO16;
     }
-    // if rgb8 is selected
     else if(sformat.compare("rgb8") == 0){
       fmt7PixFmt = PIXEL_FORMAT_RGB;
     }
@@ -532,8 +530,6 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
 
 bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet, double &value)
 {
-
-
   // return true if we can set values as desired.
   bool retVal = true;
 
@@ -549,6 +545,7 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
     prop.autoManualMode = (autoSet && pInfo.autoSupported);
     prop.absControl = pInfo.absValSupported;
     prop.onOff = pInfo.onOffSupported;
+
     if(value < pInfo.absMin)
     {
       value = pInfo.absMin;
@@ -575,7 +572,6 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
   {
     value = 0.0;
   }
-
   return retVal;
 }
 
@@ -625,7 +621,6 @@ bool PointGreyCamera::setWhiteBalance(bool &auto_white_balance, uint16_t &blue, 
   value |= blue << 12 | red;
   error = cam_.WriteRegister(white_balance_addr, value);
   handleError("PointGreyCamera::setWhiteBalance  Failed to write to register.", error);
-
   return true;
 }
 
@@ -658,6 +653,7 @@ float PointGreyCamera::getCameraFrameRate()
   fProp.type = FRAME_RATE;
   Error error = cam_.GetProperty(&fProp);
   PointGreyCamera::handleError("PointGreyCamera::getCameraFrameRate Could not get property.", error);
+  std::cout << "Frame Rate is: " << fProp.absValue << std::endl;
   return fProp.absValue;
 }
 
@@ -876,7 +872,6 @@ void PointGreyCamera::setupGigEPacketDelay(PGRGuid & guid, unsigned int packet_d
 
 void PointGreyCamera::connect()
 {
-
   if(!cam_.IsConnected())
   {
     Error error;
@@ -898,10 +893,8 @@ void PointGreyCamera::connect()
     FlyCapture2::InterfaceType ifType;
     error = busMgr_.GetInterfaceTypeFromGuid(&guid, &ifType);
     PointGreyCamera::handleError("PointGreyCamera::connect Failed to get interface style of camera", error);
-
     if (ifType == FlyCapture2::INTERFACE_GIGE)
     {
-
 		// Set packet size:
         if (auto_packet_size_)
             setupGigEPacketSize(guid);
@@ -936,13 +929,13 @@ void PointGreyCamera::connect()
     // Enable metadata
     EmbeddedImageInfo info;
     info.timestamp.onOff = true;
-    info.gain.onOff = false;
-    info.shutter.onOff = false;
-    info.brightness.onOff = false;
-    info.exposure.onOff = false;
-    info.whiteBalance.onOff = false;
+    info.gain.onOff = true;
+    info.shutter.onOff = true;
+    info.brightness.onOff = true;
+    info.exposure.onOff = true;
+    info.whiteBalance.onOff = true;
     info.frameCounter.onOff = true;
-    info.ROIPosition.onOff = false;
+    info.ROIPosition.onOff = true;
     error = cam_.SetEmbeddedImageInfo(&info);
     PointGreyCamera::handleError("PointGreyCamera::connect Could not enable metadata", error);
   }
@@ -1004,7 +997,7 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
     uint8_t bitsPerPixel = rawImage.GetBitsPerPixel();
 
     // Set the image encoding
-    std::string imageEncoding = sensor_msgs::image_encodings::RGB8;
+    std::string imageEncoding = sensor_msgs::image_encodings::MONO8;
     BayerTileFormat bayer_format = rawImage.GetBayerTileFormat();
     if(isColor_ && bayer_format != NONE)
     {
@@ -1057,7 +1050,6 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
       }
       else
       {
-
         imageEncoding = sensor_msgs::image_encodings::MONO8;
       }
     }
