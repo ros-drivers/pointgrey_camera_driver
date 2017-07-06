@@ -33,6 +33,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include <iostream>
 #include <sstream>
+#include <flycapture/FlyCapture2Defs.h>
 
 using namespace FlyCapture2;
 
@@ -164,6 +165,22 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     default:
       retVal &= false;
   }
+	
+	
+  switch (config.strobe2_polarity)
+  {
+    case pointgrey_camera_driver::PointGrey_Low:
+    case pointgrey_camera_driver::PointGrey_High:
+      {
+      bool temp = config.strobe2_polarity;
+      retVal &= PointGreyCamera::setExternalStrobe(config.enable_strobe2, pointgrey_camera_driver::PointGrey_GPIO2, config.strobe2_duration, config.strobe2_delay, temp);
+      config.strobe2_polarity = temp;
+      }
+      break;
+    default:
+      retVal &= false;
+  }
+
 
   return retVal;
 }
@@ -358,6 +375,21 @@ bool PointGreyCamera::getVideoModeFromString(std::string &vmode, FlyCapture2::Vi
   else if(vmode.compare("format7_mode3") == 0)
   {
     fmt7Mode = MODE_3;
+    vmode_out = VIDEOMODE_FORMAT7;
+  }
+  else if(vmode.compare("format7_mode4") == 0)
+  {
+    fmt7Mode = MODE_4;
+    vmode_out = VIDEOMODE_FORMAT7;
+  }
+  else if(vmode.compare("format7_mode5") == 0)
+  {
+    fmt7Mode = MODE_5;
+    vmode_out = VIDEOMODE_FORMAT7;
+  }
+  else if(vmode.compare("format7_mode7") == 0)
+  {
+    fmt7Mode = MODE_7;
     vmode_out = VIDEOMODE_FORMAT7;
   }
   else    // Something not supported was asked of us, drop down into the most compatible mode
@@ -570,11 +602,14 @@ bool PointGreyCamera::setWhiteBalance(bool &auto_white_balance, uint16_t &blue, 
     // Auto white balance is supported
     error = cam_.WriteRegister(white_balance_addr, enable);
     handleError("PointGreyCamera::setWhiteBalance  Failed to write to register.", error);
+    // Auto mode
     value |= 1 << 24;
   } else {
     // Manual mode
-    value |= blue << 12 | red;
+    value |= 0 << 24;
   }
+  // Blue is bits 8-19 (0 is MSB), red is 20-31.
+  value |= blue << 12 | red;
   error = cam_.WriteRegister(white_balance_addr, value);
   handleError("PointGreyCamera::setWhiteBalance  Failed to write to register.", error);
   return true;
@@ -859,6 +894,18 @@ void PointGreyCamera::connect()
 
         // Set packet delay:
         setupGigEPacketDelay(guid, packet_delay_);
+
+        // Enable packet resend
+        GigECamera cam;
+        Error error;
+        error = cam.Connect(&guid);
+        PointGreyCamera::handleError("PointGreyCamera::connect could not connect as GigE camera", error);
+        GigEConfig gigeconfig;
+        error = cam.GetGigEConfig(&gigeconfig);
+        PointGreyCamera::handleError("PointGreyCamera::GetGigEConfig could not get GigE setting", error);
+        gigeconfig.enablePacketResend = true;
+        error = cam.SetGigEConfig(&gigeconfig);
+        PointGreyCamera::handleError("PointGreyCamera::SetGigEConfig could not set GigE settings (packet resend)", error);
     }
 
     error = cam_.Connect(&guid);
@@ -947,7 +994,21 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
     {
       if(bitsPerPixel == 16)
       {
-        imageEncoding = sensor_msgs::image_encodings::MONO16; // 16 bit bayer not supported yet in ROS
+        switch(bayer_format)
+        {
+          case RGGB:
+            imageEncoding = sensor_msgs::image_encodings::BAYER_RGGB16;
+            break;
+          case GRBG:
+            imageEncoding = sensor_msgs::image_encodings::BAYER_GRBG16;
+            break;
+          case GBRG:
+            imageEncoding = sensor_msgs::image_encodings::BAYER_GBRG16;
+            break;
+          case BGGR:
+            imageEncoding = sensor_msgs::image_encodings::BAYER_BGGR16;
+            break;
+        }
       }
       else
       {

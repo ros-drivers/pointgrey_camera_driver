@@ -49,6 +49,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include <dynamic_reconfigure/server.h> // Needed for the dynamic_reconfigure gui service to run
 
+#include <fstream>
+
 namespace pointgrey_camera_driver
 {
 
@@ -59,22 +61,24 @@ public:
 
   ~PointGreyCameraNodelet()
   {
+    boost::mutex::scoped_lock scopedLock(connect_mutex_);
+
     if(pubThread_)
     {
       pubThread_->interrupt();
       pubThread_->join();
-    }
 
-    try
-    {
-      NODELET_DEBUG("Stopping camera capture.");
-      pg_.stop();
-      NODELET_DEBUG("Disconnecting from camera.");
-      pg_.disconnect();
-    }
-    catch(std::runtime_error& e)
-    {
-      NODELET_ERROR("%s", e.what());
+      try
+      {
+        NODELET_DEBUG("Stopping camera capture.");
+        pg_.stop();
+        NODELET_DEBUG("Disconnecting from camera.");
+        pg_.disconnect();
+      }
+      catch(std::runtime_error& e)
+      {
+        NODELET_ERROR("%s", e.what());
+      }
     }
   }
 
@@ -158,34 +162,38 @@ private:
     // Check if we should disconnect (there are 0 subscribers to our data)
     if(it_pub_.getNumSubscribers() == 0 && pub_->getPublisher().getNumSubscribers() == 0)
     {
-      NODELET_DEBUG("Disconnecting.");
-      pubThread_->interrupt();
-      scopedLock.unlock();
-      pubThread_->join();
-      scopedLock.lock();
-      sub_.shutdown();
+      if (pubThread_)
+      {
+        NODELET_DEBUG("Disconnecting.");
+        pubThread_->interrupt();
+        scopedLock.unlock();
+        pubThread_->join();
+        scopedLock.lock();
+        pubThread_.reset();
+        sub_.shutdown();
 
-      try
-      {
-        NODELET_DEBUG("Stopping camera capture.");
-        pg_.stop();
-      }
-      catch(std::runtime_error& e)
-      {
-        NODELET_ERROR("%s", e.what());
-      }
+        try
+        {
+          NODELET_DEBUG("Stopping camera capture.");
+          pg_.stop();
+        }
+        catch(std::runtime_error& e)
+        {
+          NODELET_ERROR("%s", e.what());
+        }
 
-      try
-      {
-        NODELET_DEBUG("Disconnecting from camera.");
-        pg_.disconnect();
-      }
-      catch(std::runtime_error& e)
-      {
-        NODELET_ERROR("%s", e.what());
+        try
+        {
+          NODELET_DEBUG("Disconnecting from camera.");
+          pg_.disconnect();
+        }
+        catch(std::runtime_error& e)
+        {
+          NODELET_ERROR("%s", e.what());
+        }
       }
     }
-    else if(!sub_)     // We need to connect
+    else if(!pubThread_)     // We need to connect
     {
       // Start the thread to loop through and publish messages
       pubThread_.reset(new boost::thread(boost::bind(&pointgrey_camera_driver::PointGreyCameraNodelet::devicePoll, this)));
@@ -208,8 +216,43 @@ private:
     ros::NodeHandle &pnh = getMTPrivateNodeHandle();
 
     // Get a serial number through ros
-    int serial;
-    pnh.param<int>("serial", serial, 0);
+    int serial = 0;
+
+    XmlRpc::XmlRpcValue serial_xmlrpc;
+    pnh.getParam("serial", serial_xmlrpc);
+    if (serial_xmlrpc.getType() == XmlRpc::XmlRpcValue::TypeInt)
+    {
+      pnh.param<int>("serial", serial, 0);
+    }
+    else if (serial_xmlrpc.getType() == XmlRpc::XmlRpcValue::TypeString)
+    {
+      std::string serial_str;
+      pnh.param<std::string>("serial", serial_str, "0");
+      std::istringstream(serial_str) >> serial;
+    }
+    else
+    {
+      NODELET_DEBUG("Serial XMLRPC type.");
+      serial = 0;
+    }
+
+    std::string camera_serial_path;
+    pnh.param<std::string>("camera_serial_path", camera_serial_path, "");
+    NODELET_INFO("Camera serial path %s", camera_serial_path.c_str());
+    // If serial has been provided directly as a param, ignore the path
+    // to read in the serial from.
+    while (serial == 0 && !camera_serial_path.empty())
+    {
+      serial = readSerialAsHexFromFile(camera_serial_path);
+      if (serial == 0)
+      {
+        NODELET_WARN("Waiting for camera serial path to become available");
+        ros::Duration(1.0).sleep(); // Sleep for 1 second, wait for serial device path to become available
+      }
+    }
+
+    NODELET_INFO("Using camera serial %d", serial);
+
     pg_.setDesiredCamera((uint32_t)serial);
 
     // Get GigE camera parameters:
@@ -225,7 +268,6 @@ private:
     pnh.param<std::string>("camera_info_url", camera_info_url, "");
     // Get the desired frame_id, set to 'camera' if not found
     pnh.param<std::string>("frame_id", frame_id_, "camera");
-
     // Do not call the connectCb function until after we are done initializing.
     boost::mutex::scoped_lock scopedLock(connect_mutex_);
 
@@ -267,6 +309,37 @@ private:
                diagnostic_updater::FrequencyStatusParam(&min_freq_, &max_freq_, freq_tolerance, window_size),
                diagnostic_updater::TimeStampStatusParam(min_acceptable, max_acceptable)));
   }
+
+  /**
+   * @brief Reads in the camera serial from a specified file path.
+   * The format of the serial is expected to be base 16.
+   * @param camera_serial_path The path of where to read in the serial from. Generally this
+   * is a USB device path to the serial file.
+   * @return int The serial number for the given path, 0 if failure.
+   */
+  int readSerialAsHexFromFile(std::string camera_serial_path)
+  {
+    NODELET_DEBUG("Reading camera serial file from: %s", camera_serial_path.c_str());
+
+    std::ifstream serial_file(camera_serial_path.c_str());
+    std::stringstream buffer;
+    int serial = 0;
+
+    if (serial_file.is_open())
+    {
+      std::string serial_str((std::istreambuf_iterator<char>(serial_file)), std::istreambuf_iterator<char>());
+      NODELET_DEBUG("Serial file contents: %s", serial_str.c_str());
+      buffer << std::hex << serial_str;
+      buffer >> serial;
+      NODELET_DEBUG("Serial discovered %d", serial);
+
+      return serial;
+    }
+
+    NODELET_WARN("Unable to open serial path: %s", camera_serial_path.c_str());
+    return 0;
+  }
+
 
   /*!
   * \brief Function for the boost::thread to grabImages and publish them.
@@ -389,7 +462,7 @@ private:
             NODELET_DEBUG("Starting camera.");
             pg_.start();
             NODELET_INFO("Started camera.");
-
+            NODELET_INFO("Attention: if nothing subscribes to the camera topic, the camera_info is not published on the correspondent topic.");
             state = STARTED;
           }
           catch(std::runtime_error& e)
