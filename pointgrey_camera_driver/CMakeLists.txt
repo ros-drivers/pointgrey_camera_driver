@@ -95,15 +95,11 @@ install(FILES nodelet_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION
 
 install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-catkin_install_python(PROGRAMS cmake/download_flycap
-                      DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
 if (CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
   roslaunch_add_file_check(launch/bumblebee.launch)
   roslaunch_add_file_check(launch/camera.launch)
   roslaunch_add_file_check(launch/stereo.launch)
 
-  find_package(roslint REQUIRED)
   roslint_cpp()
 endif()
