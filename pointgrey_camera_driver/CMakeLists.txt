@@ -82,7 +82,6 @@ install(TARGETS
   pointgrey_camera_node
   pointgrey_list_cameras
   pointgrey_stereo_node
-  pointgrey_list_cameras
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
