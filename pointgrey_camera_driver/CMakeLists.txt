@@ -15,22 +15,40 @@ catkin_package(CATKIN_DEPENDS
   image_exposure_msgs nodelet roscpp sensor_msgs wfov_camera_msgs
 )
 
-# If the user has manually installed flycapture, use the system path version. If not,
-# download it. We can't resolve this dependency using the usual rosdep means because
+# If flycapture is already present, use the found version. If not, download it.
+# We can't resolve this dependency using the usual rosdep means because
 # the Point Grey EULA prohibits redistributing the headers or the packages which
-# contains them. Fortunately, we can download the archive directly from their
-# website during this build process.
-find_library(POINTGREY_LIB flycapture)
+# contains them. We work around this by downloading the archive directly from
+# their website during this step in the build process.
+find_library(POINTGREY_LIB NAMES libflycapture.so.2 flycapture)
 if(NOT POINTGREY_LIB)
+  # flycapture not present, must download.
   message(STATUS "libflycapture not found in system library path")
   include(cmake/DownloadFlyCap.cmake)
   download_flycap(POINTGREY_LIB POINTGREY_INCLUDE_DIR)
   message(STATUS "libflycapture library: ${POINTGREY_LIB}")
   message(STATUS "libflycapture include: ${POINTGREY_INCLUDE_DIR}")
-  include_directories(${POINTGREY_INCLUDE_DIR})
+else()
+  string(FIND "${POINTGREY_LIB}" "${CATKIN_DEVEL_PREFIX}" SUBSTR_INDEX)
+  if(${SUBSTR_INDEX} EQUAL 0)
+    # found flycapture, but it's already in our build space; we're reconfiguring.
+    message(STATUS "libflycapture found in: ${POINTGREY_LIB}")
+    set(POINTGREY_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/usr/include")
+  else()
+    # copy it into the build directory/resolving all symlinks
+    message(STATUS "libflycapture found in system library path")
+    message(STATUS "libflycapture library: ${POINTGREY_LIB}")
+
+    get_filename_component(REAL_FLYCAPTURE ${POINTGREY_LIB} REALPATH)
+    get_filename_component(POINTGREY_LIB ${POINTGREY_LIB} NAME)
+    set(POINTGREY_LIB "${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_LIB_DESTINATION}/${POINTGREY_LIB}")
+
+    configure_file(${REAL_FLYCAPTURE} ${POINTGREY_LIB} COPYONLY)
+    message(STATUS "libflycapture copied from: ${REAL_FLYCAPTURE} into ${POINTGREY_LIB}")
+  endif()
 endif()
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${POINTGREY_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 add_library(PointGreyCamera src/PointGreyCamera.cpp)
 target_link_libraries(PointGreyCamera ${POINTGREY_LIB} ${catkin_LIBRARIES})
@@ -64,6 +82,7 @@ install(TARGETS
   pointgrey_camera_node
   pointgrey_list_cameras
   pointgrey_stereo_node
+  pointgrey_list_cameras
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -80,4 +99,12 @@ install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 catkin_install_python(PROGRAMS cmake/download_flycap
                       DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-roslint_cpp()
+if (CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
+  roslaunch_add_file_check(launch/bumblebee.launch)
+  roslaunch_add_file_check(launch/camera.launch)
+  roslaunch_add_file_check(launch/stereo.launch)
+
+  find_package(roslint REQUIRED)
+  roslint_cpp()
+endif()
