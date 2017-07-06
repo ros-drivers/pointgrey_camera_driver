@@ -3,8 +3,8 @@ project(pointgrey_camera_driver)
 
 find_package(catkin REQUIRED COMPONENTS
   camera_info_manager diagnostic_updater dynamic_reconfigure
-  image_exposure_msgs image_transport nodelet roscpp roslint
-  sensor_msgs wfov_camera_msgs
+  image_exposure_msgs image_transport nodelet roscpp sensor_msgs
+  wfov_camera_msgs
 )
 
 generate_dynamic_reconfigure_options(
@@ -101,5 +101,6 @@ if (CATKIN_ENABLE_TESTING)
   roslaunch_add_file_check(launch/camera.launch)
   roslaunch_add_file_check(launch/stereo.launch)
 
+  find_package(roslint REQUIRED)
   roslint_cpp()
 endif()
