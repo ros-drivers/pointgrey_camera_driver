@@ -42,7 +42,7 @@ LOGIN_DATA = {
 
 ARCHS = {
     'x86_64': (
-        'https://www.ptgrey.com/support/downloads/107687/', (
+        'https://www.ptgrey.com/support/downloads/10767/', (
             'flycapture2-2.11.3.121-amd64/libflycapture-2.11.3.121_amd64.deb',
             'flycapture2-2.11.3.121-amd64/libflycapture-2.11.3.121_amd64-dev.deb'),
         'usr/lib/libflycapture.so.2.11.3.121'),
