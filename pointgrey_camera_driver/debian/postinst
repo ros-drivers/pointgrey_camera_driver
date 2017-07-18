@@ -1,0 +1,21 @@
+#!/bin/bash
+set -e
+
+#DEBHELPER#
+
+# Set the usbfs_memory_mb parameter (lasts until reboot)
+sudo sh -c 'echo 1000 > /sys/module/usbcore/parameters/usbfs_memory_mb'
+
+# Modify grub to set the usbfs_memory_mb parameter at boot time
+file="/etc/default/grub"
+line="GRUB_CMDLINE_LINUX_DEFAULT=\"\$GRUB_CMDLINE_LINUX_DEFAULT usbcore.usbfs_memory_mb=1000\""
+if ! grep -Fxq "$line" $file ; then
+  prev="GRUB_CMDLINE_LINUX_DEFAULT=\"quiet" # Previous line
+  if grep -Fq "$prev" $file ; then
+    sed -i "/$prev/a $line" $file
+  else
+    echo "$line" >> $file
+  fi
+fi
+sudo update-grub
+
