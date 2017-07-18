@@ -4,7 +4,7 @@ language: generic
 compiler:
   - gcc
 env:
-  - CC=gcc CXX=g++
+  - CC=gcc CXX=g++ PATH=/usr/sbin:/usr/bin:/sbin:/bin
 install:
   - export CI_ROS_DISTRO=indigo
   - sudo sh -c 'echo "deb http://packages.ros.org/ros-shadow-fixed/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
