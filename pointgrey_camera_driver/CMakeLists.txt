@@ -2,16 +2,17 @@ cmake_minimum_required(VERSION 2.8.3)
 project(pointgrey_camera_driver)
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp nodelet sensor_msgs wfov_camera_msgs
-  image_exposure_msgs camera_info_manager image_transport
-  dynamic_reconfigure diagnostic_updater)
+  camera_info_manager diagnostic_updater dynamic_reconfigure
+  image_exposure_msgs image_transport nodelet roscpp sensor_msgs
+  wfov_camera_msgs
+)
 
 generate_dynamic_reconfigure_options(
   cfg/PointGrey.cfg
 )
 
-catkin_package(
-  CATKIN_DEPENDS roscpp nodelet
+catkin_package(CATKIN_DEPENDS
+  image_exposure_msgs nodelet roscpp sensor_msgs wfov_camera_msgs
 )
 
 # If flycapture is already present, use the found version. If not, download it.
@@ -79,8 +80,8 @@ install(TARGETS
   PointGreyCameraNodelet
   PointGreyStereoCameraNodelet
   pointgrey_camera_node
-  pointgrey_stereo_node
   pointgrey_list_cameras
+  pointgrey_stereo_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
