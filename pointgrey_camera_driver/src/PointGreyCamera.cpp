@@ -104,6 +104,12 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   // Set exposure
   retVal &= PointGreyCamera::setProperty(AUTO_EXPOSURE, config.auto_exposure, config.exposure);
 
+  // Set sharpness
+  retVal &= PointGreyCamera::setProperty(SHARPNESS, config.auto_sharpness, config.sharpness);
+
+  // Set saturation
+  retVal &= PointGreyCamera::setProperty(SATURATION, config.auto_saturation, config.saturation);
+
   // Set shutter time
   double shutter = 1000.0 * config.shutter_speed; // Needs to be in milliseconds
   retVal &= PointGreyCamera::setProperty(SHUTTER, config.auto_shutter, shutter);
@@ -165,8 +171,8 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     default:
       retVal &= false;
   }
-	
-	
+
+
   switch (config.strobe2_polarity)
   {
     case pointgrey_camera_driver::PointGrey_Low:
@@ -429,6 +435,9 @@ bool PointGreyCamera::getFormat7PixelFormatFromString(std::string &sformat, FlyC
     else if(sformat.compare("mono16") == 0)
     {
       fmt7PixFmt = PIXEL_FORMAT_MONO16;
+    }
+    else if(sformat.compare("rgb8") == 0){
+      fmt7PixFmt = PIXEL_FORMAT_RGB;
     }
     else
     {
@@ -1034,6 +1043,10 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
       if(bitsPerPixel == 16)
       {
         imageEncoding = sensor_msgs::image_encodings::MONO16;
+      }
+      else if(bitsPerPixel==24)
+      {
+        imageEncoding = sensor_msgs::image_encodings::RGB8;
       }
       else
       {
