@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+#DEBHELPER#
+
+# Remove grub modifications
+file="/etc/default/grub"
+line="GRUB_CMDLINE_LINUX_DEFAULT=\"\$GRUB_CMDLINE_LINUX_DEFAULT usbcore.usbfs_memory_mb=1000\""
+sudo sed -i -e "/$line/d" $file
+sudo update-grub
+
