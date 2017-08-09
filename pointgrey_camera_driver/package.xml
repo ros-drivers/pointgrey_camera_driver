@@ -23,6 +23,7 @@
   <build_depend>image_transport</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>diagnostic_updater</build_depend>
+  <build_depend>cv_bridge</build_depend>
   <build_depend>curl</build_depend>  <!-- to get ca-certificates for downloading flycapture -->
   <build_depend>dpkg</build_depend>  <!-- for unpacking flycapture debs -->
   <run_depend>roscpp</run_depend>
@@ -35,6 +36,7 @@
   <run_depend>image_transport</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>diagnostic_updater</run_depend>
+  <run_depend>cv_bridge</run_depend>
  
   <!-- Dependencies of libflycapture -->
   <build_depend>libusb-1.0-dev</build_depend>

@@ -48,6 +48,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <boost/thread.hpp> // Needed for the nodelet to launch the reading thread.
 
 #include <dynamic_reconfigure/server.h> // Needed for the dynamic_reconfigure gui service to run
+#include <cv_bridge/cv_bridge.h>
 
 namespace pointgrey_camera_driver
 {
@@ -99,6 +100,7 @@ private:
       wb_red_ = config.white_balance_red;
 
       // Store CameraInfo binning information
+      //binning_resize_ = config.binning;
       binning_x_ = 1;
       binning_y_ = 1;
       /*
@@ -244,6 +246,8 @@ private:
     ros::NodeHandle &nh = getMTNodeHandle();
     ros::NodeHandle &pnh = getMTPrivateNodeHandle();
 
+    binning_resize_ = 1;
+
     // Get a serial number through ros
     int serial;
     pnh.param<int>("serial", serial, 0);
@@ -320,6 +324,20 @@ private:
         // Get the image from the camera library
         NODELET_DEBUG("Starting a new grab from camera.");
         pg_.grabImage(wfov_image->image, frame_id_);
+         
+        if(true/*binning_resize_ != 1*/)
+        {
+          ROS_INFO("binning_resize_=%d", binning_resize_);
+          cv_bridge::CvImagePtr cvImg = cv_bridge::toCvCopy(wfov_image->image,
+            sensor_msgs::image_encodings::BGR8);
+          cv::Mat img_resize;
+          //cv::resize(cvImg->image, img_resize, cv::Size(wfov_image->image.width/binning_resize_, 
+          //  wfov_image->image.height/binning_resize_));
+          cv::resize(cvImg->image, img_resize, cv::Size(wfov_image->image.width/2, 
+            wfov_image->image.height/2));
+          cvImg->image = img_resize;
+          cvImg->toImageMsg(wfov_image->image);
+        }
 
         // Set other values
         wfov_image->header.frame_id = frame_id_;
@@ -440,6 +458,8 @@ private:
   int packet_size_;
   /// GigE packet delay:
   int packet_delay_;
+
+  int binning_resize_;
 };
 
 PLUGINLIB_DECLARE_CLASS(pointgrey_camera_driver, PointGreyCameraNodelet, pointgrey_camera_driver::PointGreyCameraNodelet, nodelet::Nodelet);  // Needed for Nodelet declaration
