@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(pointgrey_camera_driver)
 
 find_package(catkin REQUIRED COMPONENTS
-  camera_info_manager diagnostic_updater dynamic_reconfigure
+  camera_info_manager diagnostic_updater cv_bridge dynamic_reconfigure
   image_exposure_msgs image_transport nodelet roscpp sensor_msgs
   wfov_camera_msgs
 )
