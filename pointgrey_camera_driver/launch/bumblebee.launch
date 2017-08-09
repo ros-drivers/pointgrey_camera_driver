@@ -1,10 +1,11 @@
 <launch>
   <!-- Determine this using rosrun pointgrey_camera_driver list_cameras.
        If not specified, defaults to first camera found. -->
+  <arg name="camera_name" default="camera" />
   <arg name="bumblebee_serial" default="0" />
   <arg name="calibrated" default="0" />
 
-  <group ns="camera">
+  <group ns="$(arg camera_name)">
     <node pkg="nodelet" type="nodelet" name="bumblebee_nodelet_manager" args="manager" />
 
     <node pkg="nodelet" type="nodelet" name="bumblebee_nodelet"
@@ -15,7 +16,7 @@
       <param name="second_namespace" value="right" />
       <param name="format7_color_coding" value="raw16" />
       <param name="serial" value="$(arg bumblebee_serial)" />
-      
+
       <!-- Use the camera_calibration package to create these files -->
       <param name="camera_info_url" if="$(arg calibrated)"
              value="file://$(env HOME)/.ros/camera_info/$(arg bumblebee_serial).yaml" />

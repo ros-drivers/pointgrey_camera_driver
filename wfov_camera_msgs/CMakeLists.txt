@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(wfov_camera_msgs)
 
-find_package(catkin REQUIRED COMPONENTS sensor_msgs message_generation)
+find_package(catkin REQUIRED COMPONENTS message_generation sensor_msgs)
 
 # Generate messages in the 'msg' folder
 add_message_files(
@@ -18,7 +18,7 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS sensor_msgs message_runtime
+  CATKIN_DEPENDS message_runtime sensor_msgs
 )
 
 include_directories(
