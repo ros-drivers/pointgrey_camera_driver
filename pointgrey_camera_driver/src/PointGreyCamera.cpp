@@ -75,12 +75,25 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     {
       PixelFormat fmt7PixFmt;
       PointGreyCamera::getFormat7PixelFormatFromString(config.format7_color_coding, fmt7PixFmt);
+      switch(fmt7PixFmt)
+      {
+        case PIXEL_FORMAT_RAW8: ROS_INFO_STREAM("Setting PIXEL_FORMAT_RAW8");break;
+        case PIXEL_FORMAT_RAW16: ROS_INFO_STREAM("Setting PIXEL_FORMAT_RAW16");break;
+        case PIXEL_FORMAT_MONO8: ROS_INFO_STREAM("Setting PIXEL_FORMAT_MONO8");break;
+        case PIXEL_FORMAT_MONO16: ROS_INFO_STREAM("Setting PIXEL_FORMAT_MONO16");break;
+        case PIXEL_FORMAT_422YUV8: ROS_INFO_STREAM("Setting PIXEL_FORMAT_422YUV8");break;
+        case PIXEL_FORMAT_RGB8: ROS_INFO_STREAM("Setting PIXEL_FORMAT_RGB8");break;
+        case PIXEL_FORMAT_BGR: ROS_INFO_STREAM("Setting PIXEL_FORMAT_BGR");break;
+        default: ROS_INFO_STREAM("GetDefaultOutputFormat "<<std::hex<<fmt7PixFmt);
+      }
       // Oh no, these all need to be converted into uints, so my pass by reference trick doesn't work
       uint16_t uwidth = (uint16_t)config.format7_roi_width;
       uint16_t uheight = (uint16_t)config.format7_roi_height;
       uint16_t uoffsetx = (uint16_t)config.format7_x_offset;
       uint16_t uoffsety = (uint16_t)config.format7_y_offset;
       retVal &= PointGreyCamera::setFormat7(fmt7Mode, fmt7PixFmt, uwidth, uheight, uoffsetx, uoffsety);
+      ROS_INFO_STREAM("Setting VIDEOMODE_FORMAT7  MODE "<<fmt7Mode);
+
       config.format7_roi_width = uwidth;
       config.format7_roi_height = uheight;
       config.format7_x_offset = uoffsetx;
@@ -88,6 +101,7 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     }
     else
     {
+      ROS_INFO_STREAM("Setting VIDEOMODE "<<vMode);
       // Need to set just videoMode
       PointGreyCamera::setVideoMode(vMode);
     }
@@ -429,6 +443,14 @@ bool PointGreyCamera::getFormat7PixelFormatFromString(std::string &sformat, FlyC
     else if(sformat.compare("mono16") == 0)
     {
       fmt7PixFmt = PIXEL_FORMAT_MONO16;
+    }
+    else if(sformat.compare("rgb8") == 0)
+    {
+	  fmt7PixFmt = PIXEL_FORMAT_RGB8;
+    }
+    else if(sformat.compare("yuv422") == 0)
+    {
+	  fmt7PixFmt = PIXEL_FORMAT_422YUV8;
     }
     else
     {
@@ -987,9 +1009,14 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
     // Check the bits per pixel.
     uint8_t bitsPerPixel = rawImage.GetBitsPerPixel();
 
-    // Set the image encoding
+    // Set the default image encoding
     std::string imageEncoding = sensor_msgs::image_encodings::MONO8;
+
+    //Get image encoding details
     BayerTileFormat bayer_format = rawImage.GetBayerTileFormat();
+    PixelFormat p_fmt=rawImage.GetPixelFormat();
+    ROS_DEBUG_STREAM("bayer_format "<<bayer_format<<" bitsPerPixel "<<(unsigned)bitsPerPixel<< " PixelFormat "<<std::hex<<p_fmt);
+
     if(isColor_ && bayer_format != NONE)
     {
       if(bitsPerPixel == 16)
@@ -1029,16 +1056,23 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
         }
       }
     }
-    else     // Mono camera or in pixel binned mode.
+    else
     {
-      if(bitsPerPixel == 16)
+      switch(p_fmt)
       {
-        imageEncoding = sensor_msgs::image_encodings::MONO16;
-      }
-      else
-      {
-        imageEncoding = sensor_msgs::image_encodings::MONO8;
-      }
+
+      	case PIXEL_FORMAT_422YUV8:
+      		imageEncoding = sensor_msgs::image_encodings::YUV422;break;
+      	case PIXEL_FORMAT_RGB8:
+      		imageEncoding = sensor_msgs::image_encodings::RGB8;break;
+      	case PIXEL_FORMAT_MONO8:
+        	imageEncoding = sensor_msgs::image_encodings::MONO8;break;
+        case PIXEL_FORMAT_MONO16:
+        	imageEncoding = sensor_msgs::image_encodings::MONO16;break;
+        default:
+        	ROS_WARN_STREAM(" imageEncoding not supported (defaults to MONO8)");
+        	imageEncoding = sensor_msgs::image_encodings::MONO8;
+	}
     }
 
     fillImage(image, imageEncoding, rawImage.GetRows(), rawImage.GetCols(), rawImage.GetStride(), rawImage.GetData());
