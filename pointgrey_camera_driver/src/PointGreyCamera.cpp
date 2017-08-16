@@ -1015,9 +1015,13 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
     // Check the bits per pixel.
     uint8_t bitsPerPixel = rawImage.GetBitsPerPixel();
 
-    // Set the image encoding
+    // Set the default image encoding
     std::string imageEncoding = sensor_msgs::image_encodings::MONO8;
+
+    //Get image encoding details
     BayerTileFormat bayer_format = rawImage.GetBayerTileFormat();
+    PixelFormat p_fmt=rawImage.GetPixelFormat();
+
     if(isColor_ && bayer_format != NONE)
     {
       if(bitsPerPixel == 16)
