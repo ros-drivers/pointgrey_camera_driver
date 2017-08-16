@@ -118,6 +118,12 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   // Set exposure
   retVal &= PointGreyCamera::setProperty(AUTO_EXPOSURE, config.auto_exposure, config.exposure);
 
+  // Set sharpness
+  retVal &= PointGreyCamera::setProperty(SHARPNESS, config.auto_sharpness, config.sharpness);
+
+  // Set saturation
+  retVal &= PointGreyCamera::setProperty(SATURATION, config.auto_saturation, config.saturation);
+
   // Set shutter time
   double shutter = 1000.0 * config.shutter_speed; // Needs to be in milliseconds
   retVal &= PointGreyCamera::setProperty(SHUTTER, config.auto_shutter, shutter);
@@ -179,8 +185,8 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     default:
       retVal &= false;
   }
-	
-	
+
+
   switch (config.strobe2_polarity)
   {
     case pointgrey_camera_driver::PointGrey_Low:
@@ -1009,14 +1015,9 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
     // Check the bits per pixel.
     uint8_t bitsPerPixel = rawImage.GetBitsPerPixel();
 
-    // Set the default image encoding
+    // Set the image encoding
     std::string imageEncoding = sensor_msgs::image_encodings::MONO8;
-
-    //Get image encoding details
     BayerTileFormat bayer_format = rawImage.GetBayerTileFormat();
-    PixelFormat p_fmt=rawImage.GetPixelFormat();
-    ROS_DEBUG_STREAM("bayer_format "<<bayer_format<<" bitsPerPixel "<<(unsigned)bitsPerPixel<< " PixelFormat "<<std::hex<<p_fmt);
-
     if(isColor_ && bayer_format != NONE)
     {
       if(bitsPerPixel == 16)
