@@ -55,4 +55,11 @@ public:
   CameraImageNotReadyException(std::string msg): runtime_error(msg.c_str()) {}
 };
 
+class CameraImageConsistencyError: public std::runtime_error
+{
+public:
+  CameraImageConsistencyError(): runtime_error("Image consistency issue.") {}
+  CameraImageConsistencyError(std::string msg): runtime_error(msg.c_str()) {}
+};
+
 #endif
