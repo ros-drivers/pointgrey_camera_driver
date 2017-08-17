@@ -186,6 +186,9 @@ private:
   /// If true, camera is currently running in color mode, otherwise camera is running in mono mode
   bool isColor_;
 
+  bool color_processing_;
+  FlyCapture2::ColorProcessingAlgorithm color_processing_algo_;
+
   // For GigE cameras:
   /// If true, GigE packet size is automatically determined, otherwise packet_size_ is used:
   bool auto_packet_size_;
@@ -240,6 +243,17 @@ private:
   * \return Returns true when the configuration could be applied without modification.
   */
   bool getFormat7PixelFormatFromString(std::string &sformat, FlyCapture2::PixelFormat &fmt7PixFmt);
+
+  /*!
+  * \brief Converts the dynamic_reconfigure string type into a FlyCapture2::ColorProcessingAlgorithm
+  *
+  * This function will convert the string input from dynamic_reconfigure into the proper datatype for use with FlyCapture enum.
+  * \param cproc input Color Processing Algorithm.
+  * \param algo_out FlyCapture2::ColorProcessingAlgorithm, will be changed to either the corresponding type as cproc, or to the most compatible type.
+  *
+  * \return Returns true when the configuration could be applied without modification.
+  */
+  bool getColorProcessingAlgoFromString(std::string &cproc, FlyCapture2::ColorProcessingAlgorithm &algo_out);
 
   bool setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet,  unsigned int &valueA,  unsigned int &valueB);
 
