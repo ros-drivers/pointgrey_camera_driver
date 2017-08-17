@@ -1067,6 +1067,7 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
     // Make a FlyCapture2::Image to hold the buffer returned by the camera.
     Image rawImage;
     Image convertedImage;
+    bool isImageConverted = false;
     // Retrieve an image
     Error error = cam_.RetrieveBuffer(&rawImage);
     PointGreyCamera::handleError("PointGreyCamera::grabImage Failed to retrieve buffer", error);
@@ -1112,8 +1113,10 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
         if (color_processing_)
 		{
 			//http://www.ptgrey.com/KB/10141
-			convertedImage.SetColorProcessing( color_processing_algo_ );
-			Error convertError = convertedImage.Convert( PIXEL_FORMAT_RGB16, &rawImage );
+        	rawImage.SetColorProcessing( color_processing_algo_ );
+			Error convertError = rawImage.Convert( PIXEL_FORMAT_RGB8, &convertedImage );
+			if(convertError == PGRERROR_OK)
+				isImageConverted = true;
 		}
       }
       else
@@ -1136,14 +1139,16 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
         if (color_processing_)
 		{
 			//http://www.ptgrey.com/KB/10141
-			convertedImage.SetColorProcessing( color_processing_algo_ );
-			Error convertError = convertedImage.Convert( PIXEL_FORMAT_RGB8, &rawImage );
+        	rawImage.SetColorProcessing( color_processing_algo_ );
+			Error convertError = rawImage.Convert( PIXEL_FORMAT_RGB8, &convertedImage );
+			if(convertError == PGRERROR_OK)
+					isImageConverted = true;
 		}
       }
     }
     else
     {
-      switch(p_fmt)
+	  switch(p_fmt)
       {
 
       	case PIXEL_FORMAT_422YUV8:
@@ -1159,7 +1164,7 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
         	imageEncoding = sensor_msgs::image_encodings::MONO8;
 	}
     }
-    if (color_processing_)
+    if (isImageConverted)
     	fillImage(image, sensor_msgs::image_encodings::RGB8, convertedImage.GetRows(), convertedImage.GetCols(), convertedImage.GetStride(), convertedImage.GetData());
     else
     	fillImage(image, imageEncoding, rawImage.GetRows(), rawImage.GetCols(), rawImage.GetStride(), rawImage.GetData());
