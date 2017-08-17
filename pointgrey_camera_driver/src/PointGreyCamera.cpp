@@ -55,11 +55,14 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     PointGreyCamera::connect();
   }
 
-  // Activate mutex to prevent us from grabbing images during this time
-  boost::mutex::scoped_lock scopedLock(mutex_);
-
   // return true if we can set values as desired.
   bool retVal = true;
+
+  color_processing_=config.color_processing;
+  retVal &= PointGreyCamera::getColorProcessingAlgoFromString(config.color_processing_algo,color_processing_algo_);
+
+  // Activate mutex to prevent us from grabbing images during this time
+  boost::mutex::scoped_lock scopedLock(mutex_);
 
   // Check video mode
   VideoMode vMode; // video mode desired
@@ -333,6 +336,67 @@ bool PointGreyCamera::setFormat7(FlyCapture2::Mode &fmt7Mode, FlyCapture2::Pixel
   error = cam_.GetCameraInfo(&cInfo);
   PointGreyCamera::handleError("PointGreyCamera::setFormat7  Failed to get camera info.", error);
   isColor_ = cInfo.isColorCamera;
+
+  return retVal;
+}
+
+bool PointGreyCamera::getColorProcessingAlgoFromString(std::string &cproc, FlyCapture2::ColorProcessingAlgorithm &algo_out)
+{
+  // return true if we can set values as desired.
+  bool retVal = true;
+
+  // Get camera info to check if color or black and white chameleon
+  CameraInfo cInfo;
+  Error error = cam_.GetCameraInfo(&cInfo);
+  PointGreyCamera::handleError("PointGreyCamera::getVideoModeFromString  Failed to get camera info.", error);
+
+  if(cproc.compare("DEFAULT") == 0)
+  {
+	  algo_out = DEFAULT;
+  }
+  else if(cproc.compare("NO_COLOR_PROCESSING") == 0)
+  {
+	  algo_out = NO_COLOR_PROCESSING;
+	  color_processing_ = false;
+  }
+  else if(cproc.compare("NEAREST_NEIGHBOR") == 0)
+  {
+	  algo_out = NEAREST_NEIGHBOR;
+
+  }
+  else if(cproc.compare("EDGE_SENSING") == 0)
+  {
+	  algo_out = EDGE_SENSING;
+  }
+  else if(cproc.compare("HQ_LINEAR") == 0)
+  {
+	  algo_out = HQ_LINEAR;
+  }
+  else if(cproc.compare("RIGOROUS") == 0)
+  {
+	  algo_out = RIGOROUS;
+  }
+  else if(cproc.compare("IPP") == 0)
+  {
+	  algo_out = IPP;
+  }
+  else if(cproc.compare("DIRECTIONAL_FILTER") == 0)
+  {
+	  algo_out = DIRECTIONAL_FILTER;
+  }
+  else if(cproc.compare("WEIGHTED_DIRECTIONAL_FILTER") == 0)
+  {
+	  algo_out = WEIGHTED_DIRECTIONAL_FILTER;
+  }
+  else if(cproc.compare("COLOR_PROCESSING_ALGORITHM_FORCE_32BITS") == 0)
+  {
+    algo_out = COLOR_PROCESSING_ALGORITHM_FORCE_32BITS;
+  }
+  else    // Something not supported was asked of us, drop down into the most compatible mode
+  {
+	algo_out = DEFAULT;
+    retVal &= false;
+  }
 
   return retVal;
 }
@@ -1002,10 +1066,14 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
   {
     // Make a FlyCapture2::Image to hold the buffer returned by the camera.
     Image rawImage;
+    Image convertedImage;
     // Retrieve an image
     Error error = cam_.RetrieveBuffer(&rawImage);
     PointGreyCamera::handleError("PointGreyCamera::grabImage Failed to retrieve buffer", error);
     metadata_ = rawImage.GetMetadata();
+
+
+
 
     // Set header timestamp as embedded for now
     TimeStamp embeddedTime = rawImage.GetTimeStamp();
@@ -1041,6 +1109,12 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
             imageEncoding = sensor_msgs::image_encodings::BAYER_BGGR16;
             break;
         }
+        if (color_processing_)
+		{
+			//http://www.ptgrey.com/KB/10141
+			convertedImage.SetColorProcessing( color_processing_algo_ );
+			Error convertError = convertedImage.Convert( PIXEL_FORMAT_RGB16, &rawImage );
+		}
       }
       else
       {
@@ -1059,6 +1133,12 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
           imageEncoding = sensor_msgs::image_encodings::BAYER_BGGR8;
           break;
         }
+        if (color_processing_)
+		{
+			//http://www.ptgrey.com/KB/10141
+			convertedImage.SetColorProcessing( color_processing_algo_ );
+			Error convertError = convertedImage.Convert( PIXEL_FORMAT_RGB8, &rawImage );
+		}
       }
     }
     else
@@ -1079,8 +1159,10 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
         	imageEncoding = sensor_msgs::image_encodings::MONO8;
 	}
     }
-
-    fillImage(image, imageEncoding, rawImage.GetRows(), rawImage.GetCols(), rawImage.GetStride(), rawImage.GetData());
+    if (color_processing_)
+    	fillImage(image, sensor_msgs::image_encodings::RGB8, convertedImage.GetRows(), convertedImage.GetCols(), convertedImage.GetStride(), convertedImage.GetData());
+    else
+    	fillImage(image, imageEncoding, rawImage.GetRows(), rawImage.GetCols(), rawImage.GetStride(), rawImage.GetData());
     image.header.frame_id = frame_id;
   }
   else if(cam_.IsConnected())
