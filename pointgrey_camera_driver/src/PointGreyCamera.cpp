@@ -1216,6 +1216,10 @@ void PointGreyCamera::handleError(const std::string &prefix, const FlyCapture2::
   {
     throw CameraTimeoutException("PointGreyCamera: Failed to retrieve buffer within timeout.");
   }
+  else if(error == PGRERROR_IMAGE_CONSISTENCY_ERROR)
+  {
+    throw CameraImageConsistencyError("PointGreyCamera: Image consistency error.");
+  }
   else if(error != PGRERROR_OK)     // If there is actually an error (PGRERROR_OK means the function worked as intended...)
   {
     std::string start(" | FlyCapture2::ErrorType ");
