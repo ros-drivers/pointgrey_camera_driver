@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.13.2 (2017-09-28)
+-------------------
 * Adding camera consistency exception. (`#142 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/142>`_)
 * Use find_path to look for system headers. (`#139 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/139>`_)
 * Added support to RGB8 pixel format and controls for sharpness and saturation (`#116 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/116>`_)
