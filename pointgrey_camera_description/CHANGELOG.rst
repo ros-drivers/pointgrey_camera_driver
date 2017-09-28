@@ -2,6 +2,9 @@
 Changelog for package pointgrey_camera_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.13.1 (2017-04-19)
 -------------------
 

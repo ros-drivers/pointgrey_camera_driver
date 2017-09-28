@@ -2,6 +2,18 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Adding camera consistency exception. (`#142 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/142>`_)
+* Use find_path to look for system headers. (`#139 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/139>`_)
+* Added support to RGB8 pixel format and controls for sharpness and saturation (`#116 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/116>`_)
+  * Added support to RGB8 pixel format and controls for sharpness and saturation
+  * removed whitespaces and reverted changes to camera launch
+* Consolidate udev rules. (`#131 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/131>`_)
+* Require flycapture library and header files (`#112 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/112>`_)
+* Add multi-release support, bump SDK to 2.11.3.121 for xenial and 2.9.3.43 for trusty (`#127 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/127>`_)
+* Contributors: Bei Chen Liu, Mike Purvis, Mohammed Al-Qizwini, Vitor Matos, kmhallen
+
 0.13.1 (2017-04-19)
 -------------------
 * Add flycapture2 lib download rule for aarch64(e.g. Jetson TX1) (`#93 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/93>`_)
