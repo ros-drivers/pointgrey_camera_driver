@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.13.3 (2017-10-03)
+-------------------
 * Assume current library version for all OSes other than trusty. (`#146 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/146>`_)
 * Contributors: Mike Purvis
 
