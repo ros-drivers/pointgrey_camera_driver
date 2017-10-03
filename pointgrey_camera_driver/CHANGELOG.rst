@@ -2,6 +2,11 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Assume current library version for all OSes other than trusty. (`#146 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/146>`_)
+* Contributors: Mike Purvis
+
 0.13.2 (2017-09-28)
 -------------------
 * Adding camera consistency exception. (`#142 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/142>`_)
