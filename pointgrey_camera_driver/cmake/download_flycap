@@ -84,6 +84,7 @@ ARCHS = {
 }
 OS_LIBRARY_VERSION = {
   'trusty': 'legacy',
+  'jessie': 'legacy',
   'xenial': 'current'
 }
 
