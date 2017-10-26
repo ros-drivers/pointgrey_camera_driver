@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.13.4 (2017-10-26)
+-------------------
 * Build jessie binaries with the legacy SDK as well.
 * Contributors: Mike Purvis
 
