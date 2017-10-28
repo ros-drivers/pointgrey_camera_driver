@@ -378,5 +378,5 @@ private:
   bool do_rectify_; ///< Whether or not to rectify as if part of an image.  Set to false if whole image, and true if in ROI mode.
 };
 
-PLUGINLIB_DECLARE_CLASS(pointgrey_camera_driver, PointGreyStereoCameraNodelet, pointgrey_camera_driver::PointGreyStereoCameraNodelet, nodelet::Nodelet);  // Needed for Nodelet declaration
+PLUGINLIB_EXPORT_CLASS(pointgrey_camera_driver::PointGreyStereoCameraNodelet, nodelet::Nodelet)  // Needed for Nodelet declaration
 }

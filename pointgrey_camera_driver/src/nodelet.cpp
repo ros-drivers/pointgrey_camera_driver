@@ -605,5 +605,5 @@ private:
   pointgrey_camera_driver::PointGreyConfig config_;
 };
 
-PLUGINLIB_DECLARE_CLASS(pointgrey_camera_driver, PointGreyCameraNodelet, pointgrey_camera_driver::PointGreyCameraNodelet, nodelet::Nodelet);  // Needed for Nodelet declaration
+PLUGINLIB_EXPORT_CLASS(pointgrey_camera_driver::PointGreyCameraNodelet, nodelet::Nodelet)  // Needed for Nodelet declaration
 }
