@@ -194,7 +194,7 @@ private:
   /// GigE packet delay:
   unsigned int packet_delay_;
   /// If true, GigE packet resend is enabled:
-  unsigned int packet_resend_;
+  bool packet_resend_;
 
 
   /*!
