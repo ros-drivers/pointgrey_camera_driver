@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="pointgrey_bumblebee2">
 
   <xacro:macro name="stereo_camera"
     params="frame name fps baseline hfov width height format near far">
