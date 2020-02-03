@@ -105,7 +105,6 @@ ARCHS = {
         'type': 'src',
         'shared_library': 'usr/lib/libflycapture.so.2.13.3.31',
         'folder_name': 'flycapture.2.13.3.31_armhf'
-
     },
     'armv8': {
         'linux_arch': 'arm64',
