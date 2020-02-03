@@ -169,7 +169,7 @@ else:
 
     for deb in debs:
         logging.info("Extracting: %s", deb)
-    	subprocess.check_call(['dpkg', '--extract', '{0}/{1}'.format(folder_name, deb), '.'])
+        subprocess.check_call(['dpkg', '--extract', os.path.join(folder_name, deb), '.'])
 
 logging.info("Copying shared library.")
 shutil.copyfile(ARCHS[arch]['shared_library'], library_dest)
