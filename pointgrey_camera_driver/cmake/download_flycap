@@ -49,6 +49,7 @@ ARCHS = {
     'x86_64': {
         'linux_arch': 'amd64',
         'current': '16.04',
+        'future': '18.04',
         'type': 'deb',
         'debs': [
             'flycap-2.13.3.31_amd64.deb',
@@ -75,7 +76,6 @@ ARCHS = {
     'i386': {
         'linux_arch': 'i386',
         'current': '16.04',
-        'future': '18.04',
         'type': 'deb',
         'debs': [
             'flycap-2.13.3.31_i386.deb',
