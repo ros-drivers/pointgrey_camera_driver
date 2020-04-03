@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.14.0 (2020-04-03)
+-------------------
 * [pointgrey_camera_driver] Switched bionic to amd64.
 * Use path.join instead of manually inserting a /
 * Whitespace cleanup
