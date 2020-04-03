@@ -2,6 +2,17 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [pointgrey_camera_driver] Switched bionic to amd64.
+* Use path.join instead of manually inserting a /
+* Whitespace cleanup
+* Add the crunch-bang python line so Atom's syntax highlighting plays nicely
+* Rewrite the download_flycap script so that it downloads packages from the correct endpoint. Drop support for Trusty, add future support for Bionic
+* Add messages as build dependencies for driver executables (`#153 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/153>`_)
+* update to use non deprecated pluginlib macro (`#150 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/150>`_)
+* Contributors: Chris I-B, Kevin Allen, Mikael Arguedas, Tony Baltovski
+
 0.13.4 (2017-10-26)
 -------------------
 * Build jessie binaries with the legacy SDK as well.

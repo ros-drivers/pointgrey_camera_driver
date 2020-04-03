@@ -2,6 +2,11 @@
 Changelog for package pointgrey_camera_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed warnings about inconsistent namespace redefinitions for xmlns:xacro.
+* Contributors: Tony Baltovski
+
 0.13.4 (2017-10-26)
 -------------------
 
