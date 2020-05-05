@@ -2,6 +2,9 @@
 Changelog for package image_exposure_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.14.0 (2020-04-03)
 -------------------
 

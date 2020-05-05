@@ -2,6 +2,13 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [pointgrey_camera_driver] Added future for ARM builds.
+* Update 60-pgr.rules
+  Added another common vendorID
+* Contributors: Jeff Schmidt, Tony Baltovski
+
 0.14.0 (2020-04-03)
 -------------------
 * [pointgrey_camera_driver] Switched bionic to amd64.

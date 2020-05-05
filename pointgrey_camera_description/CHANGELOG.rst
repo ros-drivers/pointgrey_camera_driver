@@ -2,6 +2,9 @@
 Changelog for package pointgrey_camera_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.14.0 (2020-04-03)
 -------------------
 * Fixed warnings about inconsistent namespace redefinitions for xmlns:xacro.
