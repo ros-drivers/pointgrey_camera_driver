@@ -102,6 +102,7 @@ ARCHS = {
     'armv7': {
         'linux_arch': 'armhf',
         'current': '16.04',
+        'future': '18.04',
         'type': 'src',
         'shared_library': 'usr/lib/libflycapture.so.2.13.3.31',
         'folder_name': 'flycapture.2.13.3.31_armhf'
@@ -109,6 +110,7 @@ ARCHS = {
     'armv8': {
         'linux_arch': 'arm64',
         'current': '16.04',
+        'future': '18.04',
         'type': 'src',
         'shared_library': 'usr/lib/libflycapture.so.2.13.3.31',
         'folder_name': 'flycapture.2.13.3.31_arm64'
