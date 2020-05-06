@@ -41,6 +41,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include <wfov_camera_msgs/WFOVImage.h>
 #include <image_exposure_msgs/ExposureSequence.h> // Message type for configuring gain and white balance.
+#include <std_msgs/Empty.h> //Message type for software trigger
 
 #include <diagnostic_updater/diagnostic_updater.h> // Headers for publishing diagnostic messages.
 #include <diagnostic_updater/publisher.h>
@@ -171,6 +172,7 @@ private:
         scopedLock.lock();
         pubThread_.reset();
         sub_.shutdown();
+        sub_trigger_.shutdown();
 
         try
         {
@@ -377,6 +379,7 @@ private:
           {
             boost::mutex::scoped_lock scopedLock(connect_mutex_);
             sub_.shutdown();
+            sub_trigger_.shutdown();
           }
 
           try
@@ -443,6 +446,12 @@ private:
             {
               boost::mutex::scoped_lock scopedLock(connect_mutex_);
               sub_ = getMTNodeHandle().subscribe("image_exposure_sequence", 10, &pointgrey_camera_driver::PointGreyCameraNodelet::gainWBCallback, this);
+            }
+
+            // Subscribe to software triggers (must be enabled and supported by the camera)
+            {
+              boost::mutex::scoped_lock scopedLock(connect_mutex_);
+              sub_trigger_ = getMTNodeHandle().subscribe("trigger", 10, &pointgrey_camera_driver::PointGreyCameraNodelet::triggerCallback, this);
             }
 
             state = CONNECTED;
@@ -562,12 +571,26 @@ private:
     }
   }
 
+  void triggerCallback(const std_msgs::Empty &msg)
+  {
+    try
+    {
+      NODELET_DEBUG("Trigger callback: Firing software trigger");
+      pg_.fireSoftwareTrigger();
+    }
+    catch(std::runtime_error& e)
+    {
+      NODELET_ERROR("triggerCallback failed with error: %s", e.what());
+    }
+  }
+
   boost::shared_ptr<dynamic_reconfigure::Server<pointgrey_camera_driver::PointGreyConfig> > srv_; ///< Needed to initialize and keep the dynamic_reconfigure::Server in scope.
   boost::shared_ptr<image_transport::ImageTransport> it_; ///< Needed to initialize and keep the ImageTransport in scope.
   boost::shared_ptr<camera_info_manager::CameraInfoManager> cinfo_; ///< Needed to initialize and keep the CameraInfoManager in scope.
   image_transport::CameraPublisher it_pub_; ///< CameraInfoManager ROS publisher
   boost::shared_ptr<diagnostic_updater::DiagnosedPublisher<wfov_camera_msgs::WFOVImage> > pub_; ///< Diagnosed publisher, has to be a pointer because of constructor requirements
   ros::Subscriber sub_; ///< Subscriber for gain and white balance changes.
+  ros::Subscriber sub_trigger_; ///< Subscriber for software trigger
 
   boost::mutex connect_mutex_;
 

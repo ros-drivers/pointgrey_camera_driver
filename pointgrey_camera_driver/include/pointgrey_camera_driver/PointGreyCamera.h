@@ -173,6 +173,8 @@ public:
 
   uint getROIPosition();
 
+  bool fireSoftwareTrigger();
+
 private:
 
   uint32_t serial_; ///< A variable to hold the serial number of the desired camera.
