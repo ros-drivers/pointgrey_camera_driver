@@ -55,11 +55,14 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     PointGreyCamera::connect();
   }
 
-  // Activate mutex to prevent us from grabbing images during this time
-  boost::mutex::scoped_lock scopedLock(mutex_);
-
   // return true if we can set values as desired.
   bool retVal = true;
+
+  color_processing_=config.color_processing;
+  retVal &= PointGreyCamera::getColorProcessingAlgoFromString(config.color_processing_algo,color_processing_algo_);
+
+  // Activate mutex to prevent us from grabbing images during this time
+  boost::mutex::scoped_lock scopedLock(mutex_);
 
   // Check video mode
   VideoMode vMode; // video mode desired
@@ -75,12 +78,25 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     {
       PixelFormat fmt7PixFmt;
       PointGreyCamera::getFormat7PixelFormatFromString(config.format7_color_coding, fmt7PixFmt);
+      switch(fmt7PixFmt)
+      {
+        case PIXEL_FORMAT_RAW8: ROS_INFO_STREAM("Setting PIXEL_FORMAT_RAW8");break;
+        case PIXEL_FORMAT_RAW16: ROS_INFO_STREAM("Setting PIXEL_FORMAT_RAW16");break;
+        case PIXEL_FORMAT_MONO8: ROS_INFO_STREAM("Setting PIXEL_FORMAT_MONO8");break;
+        case PIXEL_FORMAT_MONO16: ROS_INFO_STREAM("Setting PIXEL_FORMAT_MONO16");break;
+        case PIXEL_FORMAT_422YUV8: ROS_INFO_STREAM("Setting PIXEL_FORMAT_422YUV8");break;
+        case PIXEL_FORMAT_RGB8: ROS_INFO_STREAM("Setting PIXEL_FORMAT_RGB8");break;
+        case PIXEL_FORMAT_BGR: ROS_INFO_STREAM("Setting PIXEL_FORMAT_BGR");break;
+        default: ROS_INFO_STREAM("GetDefaultOutputFormat "<<std::hex<<fmt7PixFmt);
+      }
       // Oh no, these all need to be converted into uints, so my pass by reference trick doesn't work
       uint16_t uwidth = (uint16_t)config.format7_roi_width;
       uint16_t uheight = (uint16_t)config.format7_roi_height;
       uint16_t uoffsetx = (uint16_t)config.format7_x_offset;
       uint16_t uoffsety = (uint16_t)config.format7_y_offset;
       retVal &= PointGreyCamera::setFormat7(fmt7Mode, fmt7PixFmt, uwidth, uheight, uoffsetx, uoffsety);
+      ROS_INFO_STREAM("Setting VIDEOMODE_FORMAT7  MODE "<<fmt7Mode);
+
       config.format7_roi_width = uwidth;
       config.format7_roi_height = uheight;
       config.format7_x_offset = uoffsetx;
@@ -88,6 +104,7 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     }
     else
     {
+      ROS_INFO_STREAM("Setting VIDEOMODE "<<vMode);
       // Need to set just videoMode
       PointGreyCamera::setVideoMode(vMode);
     }
@@ -323,6 +340,67 @@ bool PointGreyCamera::setFormat7(FlyCapture2::Mode &fmt7Mode, FlyCapture2::Pixel
   return retVal;
 }
 
+bool PointGreyCamera::getColorProcessingAlgoFromString(std::string &cproc, FlyCapture2::ColorProcessingAlgorithm &algo_out)
+{
+  // return true if we can set values as desired.
+  bool retVal = true;
+
+  // Get camera info to check if color or black and white chameleon
+  CameraInfo cInfo;
+  Error error = cam_.GetCameraInfo(&cInfo);
+  PointGreyCamera::handleError("PointGreyCamera::getVideoModeFromString  Failed to get camera info.", error);
+
+  if(cproc.compare("DEFAULT") == 0)
+  {
+	  algo_out = DEFAULT;
+  }
+  else if(cproc.compare("NO_COLOR_PROCESSING") == 0)
+  {
+	  algo_out = NO_COLOR_PROCESSING;
+	  color_processing_ = false;
+  }
+  else if(cproc.compare("NEAREST_NEIGHBOR") == 0)
+  {
+	  algo_out = NEAREST_NEIGHBOR;
+
+  }
+  else if(cproc.compare("EDGE_SENSING") == 0)
+  {
+	  algo_out = EDGE_SENSING;
+  }
+  else if(cproc.compare("HQ_LINEAR") == 0)
+  {
+	  algo_out = HQ_LINEAR;
+  }
+  else if(cproc.compare("RIGOROUS") == 0)
+  {
+	  algo_out = RIGOROUS;
+  }
+  else if(cproc.compare("IPP") == 0)
+  {
+	  algo_out = IPP;
+  }
+  else if(cproc.compare("DIRECTIONAL_FILTER") == 0)
+  {
+	  algo_out = DIRECTIONAL_FILTER;
+  }
+  else if(cproc.compare("WEIGHTED_DIRECTIONAL_FILTER") == 0)
+  {
+	  algo_out = WEIGHTED_DIRECTIONAL_FILTER;
+  }
+  else if(cproc.compare("COLOR_PROCESSING_ALGORITHM_FORCE_32BITS") == 0)
+  {
+    algo_out = COLOR_PROCESSING_ALGORITHM_FORCE_32BITS;
+  }
+  else    // Something not supported was asked of us, drop down into the most compatible mode
+  {
+	algo_out = DEFAULT;
+    retVal &= false;
+  }
+
+  return retVal;
+}
+
 bool PointGreyCamera::getVideoModeFromString(std::string &vmode, FlyCapture2::VideoMode &vmode_out, FlyCapture2::Mode &fmt7Mode)
 {
   // return true if we can set values as desired.
@@ -436,8 +514,13 @@ bool PointGreyCamera::getFormat7PixelFormatFromString(std::string &sformat, FlyC
     {
       fmt7PixFmt = PIXEL_FORMAT_MONO16;
     }
-    else if(sformat.compare("rgb8") == 0){
-      fmt7PixFmt = PIXEL_FORMAT_RGB;
+    else if(sformat.compare("rgb8") == 0)
+    {
+	  fmt7PixFmt = PIXEL_FORMAT_RGB8;
+    }
+    else if(sformat.compare("yuv422") == 0)
+    {
+	  fmt7PixFmt = PIXEL_FORMAT_422YUV8;
     }
     else
     {
@@ -983,10 +1066,15 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
   {
     // Make a FlyCapture2::Image to hold the buffer returned by the camera.
     Image rawImage;
+    Image convertedImage;
+    bool isImageConverted = false;
     // Retrieve an image
     Error error = cam_.RetrieveBuffer(&rawImage);
     PointGreyCamera::handleError("PointGreyCamera::grabImage Failed to retrieve buffer", error);
     metadata_ = rawImage.GetMetadata();
+
+
+
 
     // Set header timestamp as embedded for now
     TimeStamp embeddedTime = rawImage.GetTimeStamp();
@@ -996,9 +1084,13 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
     // Check the bits per pixel.
     uint8_t bitsPerPixel = rawImage.GetBitsPerPixel();
 
-    // Set the image encoding
+    // Set the default image encoding
     std::string imageEncoding = sensor_msgs::image_encodings::MONO8;
+
+    //Get image encoding details
     BayerTileFormat bayer_format = rawImage.GetBayerTileFormat();
+    PixelFormat p_fmt=rawImage.GetPixelFormat();
+
     if(isColor_ && bayer_format != NONE)
     {
       if(bitsPerPixel == 16)
@@ -1018,6 +1110,14 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
             imageEncoding = sensor_msgs::image_encodings::BAYER_BGGR16;
             break;
         }
+        if (color_processing_)
+		{
+			//http://www.ptgrey.com/KB/10141
+        	rawImage.SetColorProcessing( color_processing_algo_ );
+			Error convertError = rawImage.Convert( PIXEL_FORMAT_RGB8, &convertedImage );
+			if(convertError == PGRERROR_OK)
+				isImageConverted = true;
+		}
       }
       else
       {
@@ -1036,25 +1136,38 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
           imageEncoding = sensor_msgs::image_encodings::BAYER_BGGR8;
           break;
         }
+        if (color_processing_)
+		{
+			//http://www.ptgrey.com/KB/10141
+        	rawImage.SetColorProcessing( color_processing_algo_ );
+			Error convertError = rawImage.Convert( PIXEL_FORMAT_RGB8, &convertedImage );
+			if(convertError == PGRERROR_OK)
+					isImageConverted = true;
+		}
       }
     }
-    else     // Mono camera or in pixel binned mode.
+    else
     {
-      if(bitsPerPixel == 16)
+	  switch(p_fmt)
       {
-        imageEncoding = sensor_msgs::image_encodings::MONO16;
-      }
-      else if(bitsPerPixel==24)
-      {
-        imageEncoding = sensor_msgs::image_encodings::RGB8;
-      }
-      else
-      {
-        imageEncoding = sensor_msgs::image_encodings::MONO8;
-      }
-    }
 
-    fillImage(image, imageEncoding, rawImage.GetRows(), rawImage.GetCols(), rawImage.GetStride(), rawImage.GetData());
+      	case PIXEL_FORMAT_422YUV8:
+      		imageEncoding = sensor_msgs::image_encodings::YUV422;break;
+      	case PIXEL_FORMAT_RGB8:
+      		imageEncoding = sensor_msgs::image_encodings::RGB8;break;
+      	case PIXEL_FORMAT_MONO8:
+        	imageEncoding = sensor_msgs::image_encodings::MONO8;break;
+        case PIXEL_FORMAT_MONO16:
+        	imageEncoding = sensor_msgs::image_encodings::MONO16;break;
+        default:
+        	ROS_WARN_STREAM(" imageEncoding not supported (defaults to MONO8)");
+        	imageEncoding = sensor_msgs::image_encodings::MONO8;
+	}
+    }
+    if (isImageConverted)
+    	fillImage(image, sensor_msgs::image_encodings::RGB8, convertedImage.GetRows(), convertedImage.GetCols(), convertedImage.GetStride(), convertedImage.GetData());
+    else
+    	fillImage(image, imageEncoding, rawImage.GetRows(), rawImage.GetCols(), rawImage.GetStride(), rawImage.GetData());
     image.header.frame_id = frame_id;
   }
   else if(cam_.IsConnected())
