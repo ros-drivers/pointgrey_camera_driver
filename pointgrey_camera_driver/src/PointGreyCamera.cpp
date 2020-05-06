@@ -113,7 +113,6 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   // Set shutter time
   double shutter = 1000.0 * config.shutter_speed; // Needs to be in milliseconds
   retVal &= PointGreyCamera::setProperty(SHUTTER, config.auto_shutter, shutter);
-  config.shutter_speed = shutter / 1000.0; // Needs to be in seconds
 
   // Set gain
   retVal &= PointGreyCamera::setProperty(GAIN, config.auto_gain, config.gain);
