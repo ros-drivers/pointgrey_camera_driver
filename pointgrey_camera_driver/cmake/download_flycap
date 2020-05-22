@@ -27,15 +27,15 @@
 # @usage    download_flycap arch library_dest os_code_name
 #           e.g. download_flyap x64_64 /path/to/somewhere xenial
 
-import cookielib
-import cStringIO
+import http.cookiejar
+import io
 import logging
 import shutil
 import subprocess
 import sys
 import tarfile
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 import os
 
 logging.basicConfig(level=logging.INFO)
@@ -131,12 +131,12 @@ logging.info("OS code name is %s", os_code_name)
 archive_url = URL_TEMPLATES[ARCHS[arch]['type']].format(arch=ARCHS[arch]['linux_arch'], version=ARCHS[arch][library_version])
 
 logging.info("Downloading SDK archive from {0}...".format(archive_url))
-cj = cookielib.CookieJar()
-opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+cj = http.cookiejar.CookieJar()
+opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
 resp = opener.open(archive_url)
 
 logging.info('Unpacking tarball...')
-with tarfile.open(mode="r:gz", fileobj=cStringIO.StringIO(resp.read())) as tar:
+with tarfile.open(mode="r:gz", fileobj=io.StringIO(resp.read())) as tar:
     tar.extractall()
 
 if ARCHS[arch]['type'] == 'src':
