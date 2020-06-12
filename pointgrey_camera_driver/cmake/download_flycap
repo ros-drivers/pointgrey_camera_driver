@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Software License Agreement (BSD)
 #
@@ -136,7 +136,8 @@ opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
 resp = opener.open(archive_url)
 
 logging.info('Unpacking tarball...')
-with tarfile.open(mode="r:gz", fileobj=io.StringIO(resp.read())) as tar:
+fileobj=resp.read()
+with tarfile.open(mode="r:gz", fileobj=io.BytesIO(fileobj)) as tar:
     tar.extractall()
 
 if ARCHS[arch]['type'] == 'src':
