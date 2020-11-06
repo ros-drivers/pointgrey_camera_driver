@@ -2,8 +2,8 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.15.0 (2020-11-05)
+-------------------
 * [pointgrey_camera_driver] Added support for Focal. Updated CI for Noetic.
 * Fix the script & cmake file so that the archives are downloaded & unpacked correctly
 * Fix the flycap download script to work with Python3
