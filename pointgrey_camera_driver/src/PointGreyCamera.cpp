@@ -142,6 +142,9 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   config.white_balance_blue = blue;
   config.white_balance_red = red;
 
+  // Set auto shutter range
+  retVal &= PointGreyCamera::setAutoShutterRange(config.auto_shutter_range_min, config.auto_shutter_range_max);
+
   // Set trigger
   switch (config.trigger_polarity)
   {
@@ -622,6 +625,35 @@ bool PointGreyCamera::setWhiteBalance(bool &auto_white_balance, uint16_t &blue, 
   error = cam_.WriteRegister(white_balance_addr, value);
   handleError("PointGreyCamera::setWhiteBalance  Failed to write to register.", error);
   return true;
+}
+
+bool PointGreyCamera::setAutoShutterRange(uint32_t min_value, uint32_t max_value)
+{
+    if (min_value > max_value || min_value > 4095 || max_value > 4095 || min_value == 0) {
+        return false;
+    }
+
+    // Get camera info to check if color or black and white chameleon
+    CameraInfo cInfo;
+    Error error = cam_.GetCameraInfo(&cInfo);
+    handleError("PointGreyCamera::setAutoShutterRange  Failed to get camera info.", error);
+
+    unsigned auto_shutter_range_addr = 0x1098;
+    unsigned enable = 1 << 31;
+
+    const uint16_t mask = 0b111111111111;
+
+    min_value &= mask;
+    max_value &= mask;
+
+    uint32_t register_value = enable | (min_value << 12) | max_value;
+
+    error = cam_.WriteRegister(auto_shutter_range_addr, enable);
+    handleError("PointGreyCamera::setAutoShutterRange  Failed to write to register.", error);
+
+    error = cam_.WriteRegister(auto_shutter_range_addr, register_value);
+    handleError("PointGreyCamera::setAutoShutterRange  Failed to write to register.", error);
+    return true;
 }
 
 void PointGreyCamera::setTimeout(const double &timeout)

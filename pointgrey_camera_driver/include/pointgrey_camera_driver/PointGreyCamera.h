@@ -271,6 +271,18 @@ private:
   bool setWhiteBalance(bool& auto_white_balance, uint16_t &blue, uint16_t &red);
 
   /*!
+  * \brief Sets the auto shutter range property
+  *
+  * This function will set the auto shutter range for the camera..  If value is outside the range of min and max,
+  * it will return false.
+  * \param min_value Minimum value for the auto shutter range setting.
+  * \param max_value Maximum value for the auto shutter range setting.
+  *
+  * \return Returns true when the configuration could be applied without modification.
+  */
+  bool setAutoShutterRange(uint32_t min_value, uint32_t max_value);
+
+  /*!
   * \brief Gets the current frame rate.
   *
   * Gets the camera's current reported frame rate.
