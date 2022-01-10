@@ -132,26 +132,26 @@
   </xacro:macro>
 
   <xacro:macro name="BB2-03S2C-25" params="frame:=bumblebee name:=bumblebee" >
-    <pointgrey_bumblebee2 frame="${frame}" name="${name}" hfov="1.69296937443" />
+    <xacro:pointgrey_bumblebee2 frame="${frame}" name="${name}" hfov="1.69296937443" />
   </xacro:macro>
 
   <xacro:macro name="BB2-03S2C-38" params="frame:=bumblebee name:=bumblebee" >
-    <pointgrey_bumblebee2 frame="${frame}" name="${name}" hfov="1.15191730632" />
+    <xacro:pointgrey_bumblebee2 frame="${frame}" name="${name}" hfov="1.15191730632" />
   </xacro:macro>
 
   <xacro:macro name="BB2-03S2C-60" params="frame:=bumblebee name:=bumblebee" >
-    <pointgrey_bumblebee2 frame="${frame}" name="${name}" hfov="0.75049157835" />
+    <xacro:pointgrey_bumblebee2 frame="${frame}" name="${name}" hfov="0.75049157835" />
   </xacro:macro>
 
   <xacro:macro name="BB2-08S2C-25" params="frame:=bumblebee name:=bumblebee" >
-    <pointgrey_bumblebee2 frame="${frame}" name="${name}" hfov="1.69296937443" high_res="true" />
+    <xacro:pointgrey_bumblebee2 frame="${frame}" name="${name}" hfov="1.69296937443" high_res="true" />
   </xacro:macro>
 
   <xacro:macro name="BB2-08S2C-38" params="frame:=bumblebee name:=bumblebee" >
-    <pointgrey_bumblebee2 frame="${frame}" name="${name}" hfov="1.15191730632" high_res="true" />
+    <xacro:pointgrey_bumblebee2 frame="${frame}" name="${name}" hfov="1.15191730632" high_res="true" />
   </xacro:macro>
 
   <xacro:macro name="BB2-08S2C-60" params="frame:=bumblebee name:=bumblebee" >
-    <pointgrey_bumblebee2 frame="${frame}" name="${name}" hfov="0.75049157835" high_res="true" />
+    <xacro:pointgrey_bumblebee2 frame="${frame}" name="${name}" hfov="0.75049157835" high_res="true" />
   </xacro:macro>
 </robot>
