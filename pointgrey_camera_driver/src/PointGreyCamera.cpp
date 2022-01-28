@@ -675,6 +675,10 @@ static int sourceNumberFromGpioName(const std::string s)
   {
     return 3;
   }
+  else if(s.compare("software") == 0)
+  {
+    return 7;
+  }
   else
   {
     // Unrecognized pin
@@ -765,6 +769,10 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   {
     triggerMode.mode = 14;
   }
+  else if(tmode.compare("mode15") == 0)
+  {
+    triggerMode.mode = 15;
+  }
   else
   {
     // Unrecognized mode
@@ -774,6 +782,7 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   }
 
   // Parameter is used for mode3 (return one out of every N frames).  So if N is two, it returns every other frame.
+  // It is also used for mode15 (camera will acquire N images and stop)
   triggerMode.parameter = parameter;
 
   // Set trigger source
@@ -817,6 +826,21 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   delay = triggerDelay.absValue;
 
   return retVal;
+}
+
+bool PointGreyCamera::fireSoftwareTrigger() {
+  const unsigned int k_softwareTrigger = 0x62C;
+  const unsigned int k_fireVal = 0x80000000;
+  Error error;
+
+  error = cam_.WriteRegister(k_softwareTrigger, k_fireVal);
+  if (error != PGRERROR_OK)
+  {
+    PointGreyCamera::handleError("PointGreyCamera::fireSoftwareTrigger Could not fire software trigger.", error);
+    return false;
+  }
+
+  return true;
 }
 
 void PointGreyCamera::setGigEParameters(bool auto_packet_size, unsigned int packet_size, unsigned int packet_delay)
