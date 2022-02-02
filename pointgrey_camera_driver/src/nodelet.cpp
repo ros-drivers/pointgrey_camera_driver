@@ -259,9 +259,10 @@ private:
     pnh.param<int>("packet_size", packet_size_, 1400);
     pnh.param<bool>("auto_packet_size", auto_packet_size_, true);
     pnh.param<int>("packet_delay", packet_delay_, 4000);
+    pnh.param<bool>("packet_resend", packet_resend_, true);
 
     // Set GigE parameters:
-    pg_.setGigEParameters(auto_packet_size_, packet_size_, packet_delay_);
+    pg_.setGigEParameters(auto_packet_size_, packet_size_, packet_delay_, packet_resend_);
 
     // Get the location of our camera config yaml
     std::string camera_info_url;
@@ -600,6 +601,9 @@ private:
   int packet_size_;
   /// GigE packet delay:
   int packet_delay_;
+  /// If true, GigE packet resend is enabled:
+  bool packet_resend_;
+
 
   /// Configuration:
   pointgrey_camera_driver::PointGreyConfig config_;

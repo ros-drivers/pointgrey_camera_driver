@@ -819,11 +819,12 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   return retVal;
 }
 
-void PointGreyCamera::setGigEParameters(bool auto_packet_size, unsigned int packet_size, unsigned int packet_delay)
+void PointGreyCamera::setGigEParameters(bool auto_packet_size, unsigned int packet_size, unsigned int packet_delay, bool packet_resend)
 {
   auto_packet_size_ = auto_packet_size;
   packet_size_ = packet_size;
   packet_delay_ = packet_delay;
+  packet_resend_ = packet_resend;
 }
 
 void PointGreyCamera::setupGigEPacketSize(PGRGuid & guid)
@@ -870,6 +871,20 @@ void PointGreyCamera::setupGigEPacketDelay(PGRGuid & guid, unsigned int packet_d
   PointGreyCamera::handleError("PointGreyCamera::connect could not set GigE packet_delay", error);
 }
 
+void PointGreyCamera::setupGigEPacketResend(PGRGuid & guid, bool packet_resend)
+{
+  GigECamera cam;
+  Error error;
+  error = cam.Connect(&guid);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not connect as GigE camera", error);
+  GigEConfig gigeconfig;
+  error = cam.GetGigEConfig(&gigeconfig);
+  PointGreyCamera::handleError("PointGreyCamera::GetGigEConfig could not get GigE setting", error);
+  gigeconfig.enablePacketResend = packet_resend;
+  error = cam.SetGigEConfig(&gigeconfig);
+  PointGreyCamera::handleError("PointGreyCamera::SetGigEConfig could not set GigE settings (packet resend)", error);
+}
+
 void PointGreyCamera::connect()
 {
   if(!cam_.IsConnected())
@@ -905,16 +920,7 @@ void PointGreyCamera::connect()
         setupGigEPacketDelay(guid, packet_delay_);
 
         // Enable packet resend
-        GigECamera cam;
-        Error error;
-        error = cam.Connect(&guid);
-        PointGreyCamera::handleError("PointGreyCamera::connect could not connect as GigE camera", error);
-        GigEConfig gigeconfig;
-        error = cam.GetGigEConfig(&gigeconfig);
-        PointGreyCamera::handleError("PointGreyCamera::GetGigEConfig could not get GigE setting", error);
-        gigeconfig.enablePacketResend = true;
-        error = cam.SetGigEConfig(&gigeconfig);
-        PointGreyCamera::handleError("PointGreyCamera::SetGigEConfig could not set GigE settings (packet resend)", error);
+        setupGigEPacketResend(guid, packet_resend_);
     }
 
     error = cam_.Connect(&guid);
