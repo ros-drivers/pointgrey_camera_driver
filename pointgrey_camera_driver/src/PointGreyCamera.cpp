@@ -456,6 +456,14 @@ bool PointGreyCamera::getFormat7PixelFormatFromString(std::string &sformat, FlyC
     {
       fmt7PixFmt = PIXEL_FORMAT_MONO16;
     }
+    else if(sformat.compare("raw8") == 0)
+    {
+      fmt7PixFmt = PIXEL_FORMAT_RAW8;
+    }
+    else if(sformat.compare("raw16") == 0)
+    {
+      fmt7PixFmt = PIXEL_FORMAT_RAW16;
+    }
     else
     {
       sformat = "mono8";
